@@ -24,13 +24,13 @@ of space and time
 
 ### Software
 * Extend the actual code to include more objects. (Low priority)
-* Translate the actual code in order to make it compatible with Python 3.
 * Establish a connection with the git repository to get the commit identifier.
+* Inner classes.
 * Loops :
   1. Inter-function navigation in the loop
-  2. Variable storing techniques : full, sample (then what size ?), ranger (if applicable), other ?
-  3. Conditions --> proportion of execution times (how often ?)
-  4. Ability to plot values distribution for a specified variable in aggregations
+  2. Variable storing techniques : full, sample (then what size ?), ranges (if applicable), other ?
+  3. Conditions --> proportion of execution times (how often?)
+  4. Ability to plot values distribution for a specified variable in aggregations.
 
 ### Interface
 * Develop an interface in HTML/Python in order to visualize the results.
@@ -38,5 +38,7 @@ of space and time
 * In this interface th euser should have at least these possibilites :
   * Filter the diferent runs by date, commit identifier and author of the run
   * Delete a run
-* The user should be able to open at least two different runs in order to be able to compare them
-  * To add : Detailed workflow on comparisons
+* The user should be able to open at least two different runs in order to be able to compare them.
+
+### Experiments
+  * Detailed workflow on experiments
