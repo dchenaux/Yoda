@@ -5,7 +5,7 @@ b = 3
 
 for c in range(10):
     d = c
-    print c
+    print(c)
 
 
 def spam(arg):
@@ -13,3 +13,4 @@ def spam(arg):
     return result
 
 x = spam(8)
+
