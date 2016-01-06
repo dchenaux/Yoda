@@ -14,6 +14,7 @@ class Yoda(bdb.Bdb):
     instrumented_types = (int)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
 
+
     def __init__(self):
         bdb.Bdb.__init__(self)
         if not settings.DEBUG: # If DEBUG is to FALSE connect to mongodb
@@ -68,4 +69,3 @@ class Yoda(bdb.Bdb):
         self.set_continue()  # continue
 
 db = Yoda()
-db.set_trace()
