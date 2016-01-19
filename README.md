@@ -34,7 +34,7 @@ of space and time
 
 ### Interface
 * Develop an interface in HTML/Python in order to visualize the results.
-* The framework "Django MongoDB Engine" will be used to develop the interface
+* The framework "Mongoengine" will be used to develop the interface
 * In this interface th euser should have at least these possibilites :
   * Filter the diferent runs by date, commit identifier and author of the run
   * Delete a run
