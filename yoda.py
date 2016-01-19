@@ -1,6 +1,5 @@
 import bdb
 from collections import defaultdict
-from pymongo import MongoClient
 from datetime import datetime
 import settings
 from mongoengine import *
