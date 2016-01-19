@@ -1,12 +1,19 @@
 import bdb
 from collections import defaultdict
-#import types
-#import os.path
 from pymongo import MongoClient
 from datetime import datetime
 import settings
-import inspect
-import sys
+from mongoengine import *
+
+class Line(EmbeddedDocument):
+    lineno = IntField()
+    data = ListField()
+
+class File(Document):
+    revision = StringField()
+    filename = StringField()
+    timestamp = DateTimeField()
+    lines = ListField(EmbeddedDocumentField(Line))
 
 class Yoda(bdb.Bdb):
     run = 0
@@ -18,8 +25,7 @@ class Yoda(bdb.Bdb):
     def __init__(self):
         bdb.Bdb.__init__(self)
         if not settings.DEBUG: # If DEBUG is to FALSE connect to mongodb
-            self.client = MongoClient(settings.MONGODB_URI)
-            self.db = self.client['yoda']
+            connect('yoda')
         self._clear_cache()
 
     def _clear_cache(self):
@@ -49,17 +55,19 @@ class Yoda(bdb.Bdb):
         if self.json_results:
             for module_file, lines in self.json_results.items():
                 if settings.DEBUG:
-                    print (module_file)
-                    print (lines)
+                    for lineo, data in lines.items():
+                        print(lineo)
+                        print(type(data))
                     
                 else:
-                    #collection_name, _ = os.path.splitext(os.path.basename(module_file))
-                    collection = self.db['file']
-                    item = {'revision': 1,
-                            'filename': module_file,
-                            'timestamp': datetime.utcnow(),
-                            'lines': [{'lineno': lineno, 'data': data} for lineno, data in lines.items()]}
-                    collection.insert(item)
+                    item = File(revision='1', filename=module_file, timestamp=datetime.utcnow())
+                    for lineno, data in lines.items():
+                        line = Line(lineno = lineno, data = data)
+                        item.lines.append(line)
+
+                    item.save()
+
+
             self._clear_cache()
         self.set_step()  # continue
 
