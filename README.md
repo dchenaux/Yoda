@@ -23,6 +23,7 @@ of space and time
   * a identifier to know from which file the run is.
 
 ### Software
+* Use the Mongoengine
 * Extend the actual code to include more objects. (Low priority)
 * Establish a connection with the git repository to get the commit identifier.
 * Inner classes.
@@ -34,7 +35,7 @@ of space and time
 
 ### Interface
 * Develop an interface in HTML/Python in order to visualize the results.
-* The framework "Mongoengine" will be used to develop the interface
+* The framework "Flask" will be used to develop the interface
 * In this interface th euser should have at least these possibilites :
   * Filter the diferent runs by date, commit identifier and author of the run
   * Delete a run
