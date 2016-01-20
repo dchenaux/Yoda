@@ -1,15 +1,17 @@
 import bdb
 from collections import defaultdict
 from datetime import datetime
+
 from mongoengine import *
 
 import settings
 from docdef import *
 
+
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
-    instrumented_types = (int)
+    instrumented_types = (int, str)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
 
 
@@ -37,8 +39,7 @@ class Yoda(bdb.Bdb):
         self.set_step() # continue
 
     def user_line(self, frame):
-        # str line number because mongo do not accept int keys
-        lineno = str(frame.f_lineno-1)
+        lineno = frame.f_lineno-1
         self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
         self.set_step()
 
