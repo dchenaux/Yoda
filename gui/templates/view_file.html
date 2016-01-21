@@ -1,5 +1,71 @@
 {% extends "layout.html" %}
 
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='syntaxhighlighter/shCore.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='syntaxhighlighter/shThemeDefault.css')}}">
+{% endblock %}
+
+{% block scripts %}
+    {{super()}}
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='syntaxhighlighter/shCore.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='syntaxhighlighter/shBrushPython.js') }}"></script>
+
+    <script type="text/javascript">
+        SyntaxHighlighter.all()
+    </script>
+
+    <script type="text/javascript">
+    $(function () {
+        $('#container').highcharts({
+            title: {
+                text: '',
+                x: -20 //center
+            },
+            subtitle: {
+                text: '',
+                x: -20
+            },
+            xAxis: {
+                plotLines: [{
+                value: 0,
+                width: 1,
+                color: '#808080'
+                }]
+            },
+            yAxis: {
+                title: {
+                    text: ''
+                },
+                plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
+                }],
+            },
+            tooltip: {
+                valueSuffix: ''
+            },
+            legend: {
+                layout: 'vertical',
+                align: 'right',
+                verticalAlign: 'middle',
+                borderWidth: 0
+            },
+            series: [
+            {%for k, v in series%}
+                {
+                    name: '{{k}}',
+                    data: {{v}}
+                },
+            {%endfor%}
+            ]
+        });
+    });
+    </script>
+{% endblock %}
+
 
 {% block content %}
     <div class="container">
@@ -7,13 +73,33 @@
             {% for file in files %}
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Timestamp : {{file.timestamp}}</p>
-                {% for line in file.lines %}
-                    <h3>Line : {{line.lineno}}</h3>
-                    {% for set in line.data%}
-                        <p>{{set}}</p>
-                    {%endfor%}
+                <div id="container" style="min-width: 310px; height: 300px; max-width: 1000px; margin: 50px auto"></div>
+                <div class="col-md-8">
+                    <pre class="brush: py">{{file.content}}</pre>
+                </div>
+                <div class="col-md-4">
+                    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    {% for line in file.lines %}
+                        <div class="panel panel-default">
+                            <div class="panel-heading" role="tab" id="heading{{line.lineno}}">
+                                <h4 class="panel-title">
+                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{line.lineno}}" aria-expanded="false" aria-controls="collapse{{line.lineno}}">
+                                  Line : {{line.lineno}}
+                                </a>
+                                </h4>
+                            </div>
+                            <div id="collapse{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
+                                <div class="panel-body">
+                                    {% for set in line.data%}
+                                    <p>{{set}}</p>
+                                    {%endfor%}
+                                </div>
+                            </div>
+                          </div>
+                    {% endfor %}
+                    </div>
+                </div>
                 {% endfor %}
-            {% endfor %}
         </div>
     </div>
 {% endblock %}
