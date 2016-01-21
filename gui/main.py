@@ -4,7 +4,6 @@ from flask import Flask, render_template, redirect, url_for
 from flask.ext.mongoengine import MongoEngine
 from flask_bootstrap import Bootstrap
 from collections import defaultdict
-from collections import OrderedDict
 
 app = Flask(__name__)
 app.config['MONGODB_DB'] = 'yoda'
@@ -29,10 +28,6 @@ def view_file(file_id):
 
     for k,v in list_var_value: series[k].append(v)
     print(series)
-
-    """for k,v in dict_var_value.items():
-        series.append({'name': k, 'data': v})"""
-
 
     return render_template('view_file.html', files=File.objects(id=file_id), series=series.items())
 
