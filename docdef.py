@@ -10,4 +10,5 @@ class File(Document):
     revision = StringField()
     filename = StringField()
     timestamp = DateTimeField()
+    content = StringField()
     lines = ListField(EmbeddedDocumentField(Line))

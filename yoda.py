@@ -1,6 +1,7 @@
 import bdb
 from collections import defaultdict
 from datetime import datetime
+import subprocess
 
 from mongoengine import *
 
@@ -34,6 +35,9 @@ class Yoda(bdb.Bdb):
             new_locals.append((name, value))
         return new_locals
 
+    def _get_git_revision_short_hash(self):
+        return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+
     def user_call(self, frame, args):
         # TODO: may be also flush on call
         self.set_step() # continue
@@ -44,16 +48,21 @@ class Yoda(bdb.Bdb):
         self.set_step()
 
     def user_return(self, frame, value):
-        if self.json_results:
+
+        file = open(frame.f_globals['__file__'], 'r')
+        file_content = file.read()
+        file.close()
+
+        if self.json_results and file_content:
             for module_file, lines in self.json_results.items():
                 if settings.DEBUG:
-                    for lineo, data in lines.items():
-                        print(lineo)
-                        print(type(data))
-                    
-                else:
-                    item = File(revision='1', filename=module_file, timestamp=datetime.utcnow())
                     for lineno, data in lines.items():
+                        print(lineno)
+                        print(type(data))
+
+                else:
+                    item = File(revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
+                    for lineno, data in sorted(lines.items()):
                         line = Line(lineno = lineno, data = data)
                         item.lines.append(line)
 
