@@ -8,9 +8,12 @@
 {% block scripts %}
     {{super()}}
     <script type=text/javascript src="{{ url_for('static', filename='jquery.dataTables.min.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='dataTables.bootstrap.min.js') }}"></script>
     <script type="text/javascript">
         $(document).ready( function () {
-            $('#table').DataTable();
+            $('#table').DataTable({
+                "order": [[ 1, "desc" ]]
+            } );
         } );
      </script>
     <script type="text/javascript">
@@ -54,6 +57,7 @@
                         <th>Timestamp</th>
                         <th>Filename</th>
                         <th>Revision</th>
+                        <th>User</th>
                         <th>Action</th>
                     </tr>
                 </thead>
@@ -62,6 +66,7 @@
                     <td>{{ file.timestamp }}</td>
                     <td>{{ file.filename }}</td>
                     <td>{{ file.revision }}</td>
+                    <td>{{ file.user }}</td>
                     <td>
                         <a href="view_file/{{file.id}}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
                         <a href="#" data-href="remove_file/{{file.id}}" data-toggle="modal" data-target="#confirm-delete">

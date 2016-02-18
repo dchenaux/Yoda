@@ -4,6 +4,7 @@
     {{super()}}
     <link rel="stylesheet" href="{{url_for('static', filename='syntaxhighlighter/shCore.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='syntaxhighlighter/shThemeDefault.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='default.css')}}">
 {% endblock %}
 
 {% block scripts %}
@@ -32,7 +33,8 @@
                 value: 0,
                 width: 1,
                 color: '#808080'
-                }]
+                }],
+                allowDecimals: false
             },
             yAxis: {
                 title: {

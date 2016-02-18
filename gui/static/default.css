@@ -1,0 +1,3 @@
+.syntaxhighlighter table .container:before {
+    display: none !important;
+}

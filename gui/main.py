@@ -27,7 +27,6 @@ def view_file(file_id):
                     list_var_value.append(var_and_value)
 
     for k,v in list_var_value: series[k].append(v)
-    print(series)
 
     return render_template('view_file.html', files=File.objects(id=file_id), series=series.items())
 

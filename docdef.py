@@ -7,6 +7,7 @@ class Line(EmbeddedDocument):
 
 
 class File(Document):
+    user = StringField()
     revision = StringField()
     filename = StringField()
     timestamp = DateTimeField()
