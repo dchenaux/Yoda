@@ -11,7 +11,6 @@ import settings
 from docdef import *
 
 
-
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
@@ -24,6 +23,11 @@ class Yoda(bdb.Bdb):
         if not settings.DEBUG: # If DEBUG is to FALSE connect to mongodb
             connect('yoda')
         self._clear_cache()
+
+        # Key: frame object
+        # Value: monotonically increasing small ID, based on call order
+        self.frame_ordered_ids = {}
+        self.cur_frame_id = 1
 
     def _clear_cache(self):
         self.json_results = defaultdict(lambda: defaultdict(list))
@@ -46,13 +50,13 @@ class Yoda(bdb.Bdb):
 
     def user_call(self, frame, args):
         # TODO: may be also flush on call
-        self.set_step() # continue
+        self.interaction(frame, None, 'call')
 
     def user_line(self, frame):
         lineno = frame.f_lineno-1
         self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
-        print(lineno, self._filter_locals(frame.f_locals))
-        self.set_step()
+        #print(lineno, self._filter_locals(frame.f_locals))
+        self.interaction(frame, None, 'step_line')
 
     def user_return(self, frame, value):
 
@@ -83,5 +87,48 @@ class Yoda(bdb.Bdb):
         name = frame.f_code.co_name or "<unknown>"
         print("exception in", name, exception)
         self.set_continue()  # continue
+
+    def forget(self):
+        self.lineno = None
+        self.stack = []
+        self.curindex = 0
+        self.curframe = None
+
+    def setup(self, f, t):
+        self.forget()
+        self.stack, self.curindex = self.get_stack(f, t)
+        self.curframe = self.stack[self.curindex][0]
+
+
+
+
+    def interaction(self, frame, traceback, event_type):
+        self.setup(frame, traceback)
+        tos = self.stack[self.curindex]
+        top_frame = tos[0]
+        lineno = tos[1]
+
+        # Avoid tracing imported libraries
+        if  self.canonic(top_frame.f_code.co_filename).startswith(('/lib/','/usr/')):
+            return
+        # also don't trace inside of the magic "constructor" code
+        if top_frame.f_code.co_name == '__new__':
+            return
+        # or __repr__, which is often called when running print statements
+        if top_frame.f_code.co_name == '__repr__':
+            return
+
+        if event_type == 'call':
+            return
+
+        if event_type == 'step_line':
+            print(lineno, self._filter_locals(top_frame.f_locals))
+
+
+
+        # each element is a pair of (function name, ENCODED locals dict)
+        encoded_stack_locals = []
+
+
 
 db = Yoda()
