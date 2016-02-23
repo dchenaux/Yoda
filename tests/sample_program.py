@@ -1,6 +1,6 @@
-import yoda
+#import yoda
 
-yoda.db.set_trace()
+#yoda.db.set_trace()
 
 a = 1
 b = 3
@@ -16,4 +16,4 @@ def spam(arg):
 
 x = spam(8)
 
-yoda.db.set_continue()
+#yoda.db.set_continue()
