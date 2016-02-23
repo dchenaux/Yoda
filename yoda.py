@@ -5,6 +5,7 @@ import subprocess
 import sys
 import traceback
 import io as StringIO
+import re
 
 from mongoengine import *
 
@@ -56,13 +57,16 @@ class Yoda(bdb.Bdb):
         return subprocess.check_output(['git', 'config', 'user.name'])
 
     def user_call(self, frame, args):
-        # TODO: may be also flush on call
+        if self._wait_for_mainpyfile:
+            return
         self.interaction(frame, None, 'call')
 
     def user_line(self, frame):
-        #lineno = frame.f_lineno-1
-        #self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
-        #print(lineno, self._filter_locals(frame.f_locals))
+        if self._wait_for_mainpyfile:
+            if (self.canonic(frame.f_code.co_filename) != "<string>" or
+                frame.f_lineno <= 0):
+                return
+            self._wait_for_mainpyfile = 0
         self.interaction(frame, None, 'step_line')
 
     def user_return(self, frame, value):
@@ -90,43 +94,46 @@ class Yoda(bdb.Bdb):
         top_frame = tos[0]
         lineno = tos[1]
 
-        # Avoid tracing imported libraries
-        if  self.canonic(top_frame.f_code.co_filename).startswith(('/lib/','/usr/')):
-            return
+        # don't trace inside of ANY functions that aren't user-written code
+        # (e.g., those from imported modules -- e.g., random, re -- or the
+        # __restricted_import__ function in this file)
+        #
+        # empirically, it seems like the FIRST entry in self.stack is
+        # the 'run' function from bdb.py, but everything else on the
+        # stack is the user program's "real stack"
+
+        # Look only at the "topmost" frame on the stack ...
+
+        # it seems like user-written code has a filename of '<string>',
+        # but maybe there are false positives too?
+        if self.canonic(top_frame.f_code.co_filename) != '<string>':
+          return
         # also don't trace inside of the magic "constructor" code
         if top_frame.f_code.co_name == '__new__':
-            return
+          return
         # or __repr__, which is often called when running print statements
         if top_frame.f_code.co_name == '__repr__':
-            return
+          return
+
+        # if top_frame.f_globals doesn't contain the sentinel '__OPT_toplevel__',
+        # then we're in another global scope altogether, so skip it!
+        # (this comes up in tests/backend-tests/namedtuple.txt)
+        if '__OPT_toplevel__' not in top_frame.f_globals:
+          return
 
         if event_type == 'call':
             return
 
         if event_type == 'step_line':
             print(lineno, self._filter_locals(top_frame.f_locals))
+            #self.json_results[top_frame.f_globals['__file__']][lineno].append(self._filter_locals(top_frame.f_locals))
 
         if event_type == 'return':
             return
 
-        # each element is a pair of (function name, ENCODED locals dict)
-        encoded_stack_locals = []
+        self.forget()
 
     def run_script(self,script_str):
-        self.executed_script = script_str
-        self.executed_script_lines = self.executed_script.splitlines()
-
-        for (i, line) in enumerate(self.executed_script_lines):
-          line_no = i + 1
-          if line.endswith('#break'):
-            self.breakpoints.append(line_no)
-
-        # When bdb sets tracing, a number of call and line events happens
-        # BEFORE debugger even reaches user's code (and the exact sequence of
-        # events depends on python version). So we take special measures to
-        # avoid stopping before we reach the main script (see user_line and
-        # user_call for details).
-        self._wait_for_mainpyfile = 1
 
         user_stdout = StringIO.StringIO()
 
@@ -139,14 +146,24 @@ class Yoda(bdb.Bdb):
 
         self.run(script_str, user_globals, user_globals)
 
+        if self.json_results:
+            for module_file, lines in self.json_results.items():
+                if settings.DEBUG:
+                    for lineno, data in lines.items():
+                        print(lineno)
+                        print(type(data))
+
+                else:
+                    item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=top_frame)
+                    for lineno, data in sorted(lines.items()):
+                        line = Line(lineno = lineno, data = data)
+                        item.lines.append(line)
+
+                    item.save()
+
 def exec_script(script_str):
     logger = Yoda()
     try:
         logger.run_script(script_str)
     except bdb.BdbQuit:
         pass
-
-
-
-
-exec_script(open("tests/sample_program.py").read())
