@@ -1,16 +1,12 @@
 import bdb
+import io as StringIO
+import subprocess
 from collections import defaultdict
 from datetime import datetime
-import subprocess
-import sys
-import traceback
-import io as StringIO
-import re
-
-from mongoengine import *
 
 import settings
 from docdef import *
+
 
 
 class Yoda(bdb.Bdb):
@@ -19,11 +15,14 @@ class Yoda(bdb.Bdb):
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
 
 
-    def __init__(self):
+    def __init__(self, file_path):
         bdb.Bdb.__init__(self)
         if not settings.DEBUG: # If DEBUG is to FALSE connect to mongodb
             connect('yoda')
+            #TODO : show some error message if it can't connect to the database
         self._clear_cache()
+
+        self.file_path = file_path
 
         self._wait_for_mainpyfile = 0
 
@@ -126,7 +125,7 @@ class Yoda(bdb.Bdb):
 
         if event_type == 'step_line':
             print(lineno, self._filter_locals(top_frame.f_locals))
-            #self.json_results[top_frame.f_globals['__file__']][lineno].append(self._filter_locals(top_frame.f_locals))
+            self.json_results[self.file_path][lineno].append(self._filter_locals(top_frame.f_locals))
 
         if event_type == 'return':
             return
@@ -154,15 +153,15 @@ class Yoda(bdb.Bdb):
                         print(type(data))
 
                 else:
-                    item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=top_frame)
+                    item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=script_str)
                     for lineno, data in sorted(lines.items()):
                         line = Line(lineno = lineno, data = data)
                         item.lines.append(line)
 
                     item.save()
 
-def exec_script(script_str):
-    logger = Yoda()
+def exec_script(script_str,file_path):
+    logger = Yoda(file_path)
     try:
         logger.run_script(script_str)
     except bdb.BdbQuit:

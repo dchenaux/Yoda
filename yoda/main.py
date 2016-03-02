@@ -1,9 +1,12 @@
-from mongoengine import *
-from docdef import *
+#!/usr/bin/env python
+
+from collections import defaultdict
+
 from flask import Flask, render_template, redirect, url_for
 from flask.ext.mongoengine import MongoEngine
 from flask_bootstrap import Bootstrap
-from collections import defaultdict
+
+from docdef import *
 
 app = Flask(__name__)
 app.config['MONGODB_DB'] = 'yoda'
