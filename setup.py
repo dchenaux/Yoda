@@ -6,18 +6,12 @@ from setuptools import setup, find_packages
 
 __author__      = 'David Chenaux'
 __license__     = 'Modified BSD license'
-__version__     = '0.1'
+__version__     = '0.2'
 __maintainer__  = __author__
 __email__       = 'd.chenaux@gmail.com'
 __url__         = 'https://github.com/dchenaux/yoda'
 __summary__     = __doc__
 
-# Utility function to read the README file.
-# Used for the long_description.  It's nice, because now 1) we have a top level
-# README file and 2) it's easier to type in the README file than to put a raw
-# string in below ...
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 
 setup(
     name='yoda',
@@ -30,7 +24,7 @@ setup(
     download_url=__url__,
 
     description=__summary__,
-    long_description=read('README.md'),
+    long_description=open('README').read(),
 
     license=__license__,
     packages=find_packages(),
