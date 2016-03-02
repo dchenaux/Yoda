@@ -4,6 +4,8 @@ import subprocess
 from collections import defaultdict
 from datetime import datetime
 
+from mongoengine import *
+
 import settings
 from docdef import *
 
