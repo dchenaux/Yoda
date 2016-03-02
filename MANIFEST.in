@@ -1,2 +1,4 @@
 include yoda/static/*
 include yoda/templates/*
+include README.md
+include LICENSE

@@ -24,7 +24,7 @@ setup(
     download_url=__url__,
 
     description=__summary__,
-    long_description=open('README').read(),
+    long_description=open('README.md').read(),
 
     license=__license__,
     packages=find_packages(),
