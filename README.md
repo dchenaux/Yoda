@@ -36,8 +36,8 @@ of space and time
 ### Interface
 * Develop an interface in HTML/Python in order to visualize the results.
 * The framework "Flask" will be used to develop the interface
-* In this interface th euser should have at least these possibilites :
-  * Filter the diferent runs by date, commit identifier and author of the run
+* In this interface the user should have at least these possibilites :
+  * Filter the different runs by date, commit identifier and author of the run
   * Delete a run
 * The user should be able to open at least two different runs in order to be able to compare them.
 
