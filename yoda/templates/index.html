@@ -22,6 +22,17 @@
             $('.debug-url').html('Delete URL: <strong>' + $(this).find('.btn-ok').attr('href') + '</strong>');
         });
     </script>
+    <script type="text/javascript">
+        $('#compare').click( function() {
+            var checked = [];
+            $.each($("input[type='checkbox']:checked"),function(){ checked.push($(this).val());});
+
+            if (checked.length > 2) {alert("You are not allowed to compare more than 2 files");}
+            else if (checked.length == 0) {alert("Please select a file !");}
+            else if (checked.length == 1) {document.location.href = 'view_file/'+checked;}
+            else {document.location.href = 'compare_files/'+checked.join("&");}
+        });
+    </script>
 {% endblock %}
 
 {% block content %}
@@ -54,28 +65,33 @@
             <table class="table" id="table">
                 <thead>
                     <tr>
+                        <th>Action</th>
                         <th>Timestamp</th>
                         <th>Filename</th>
                         <th>Revision</th>
                         <th>User</th>
-                        <th>Action</th>
                     </tr>
                 </thead>
+                <tbody>
             {% for file in files %}
                 <tr>
-                    <td>{{ file.timestamp }}</td>
-                    <td>{{ file.filename }}</td>
-                    <td>{{ file.revision }}</td>
-                    <td>{{ file.user }}</td>
                     <td>
+                        <input type="checkbox" value="{{file.id}}">
                         <a href="view_file/{{file.id}}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
                         <a href="#" data-href="remove_file/{{file.id}}" data-toggle="modal" data-target="#confirm-delete">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </a>
                     </td>
+                    <td>{{ file.timestamp }}</td>
+                    <td>{{ file.filename }}</td>
+                    <td>{{ file.revision }}</td>
+                    <td>{{ file.user }}</td>
                 </tr>
             {% endfor %}
+                </tbody>
             </table>
+                For the selection (max. 2 files): <a href="#" id="compare"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Compare</a>
+            </p>
         </div>
     </div>
 {% endblock %}

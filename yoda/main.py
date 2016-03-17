@@ -12,7 +12,7 @@ Bootstrap(app)
 
 @app.route("/")
 def index():
-    return render_template('index.html', files=File.objects.order_by('-timestamp'))
+    return render_template('index.html', files=File.objects.exclude("lines", "content").order_by('-timestamp'))
 
 @app.route("/view_file/<file_id>")
 def view_file(file_id):
@@ -29,6 +29,11 @@ def view_file(file_id):
     for k,v in list_var_value: series[k].append(v)
 
     return render_template('view_file.html', files=File.objects(id=file_id), series=series.items())
+
+@app.route("/compare_files/<files_id>")
+def compare_files(files_id):
+
+    return render_template('compare_files.html')
 
 @app.route("/remove_file/<file_id>")
 def remove_file(file_id):

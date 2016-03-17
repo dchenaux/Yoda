@@ -6,7 +6,7 @@ a = 1
 b = 3
 
 
-for c in range(10):
+for c in range(100):
     d = c
     print(c)
 
