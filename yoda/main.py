@@ -6,7 +6,6 @@ from flask_bootstrap import Bootstrap
 from flask_debugtoolbar import DebugToolbarExtension
 
 from collections import defaultdict
-import time
 
 app = Flask(__name__)
 app.config['MONGODB_DB'] = 'yoda'
@@ -40,8 +39,9 @@ def view_file(file_id):
 
     list_var_value = []
     series = defaultdict(list)
+    file_object = File.objects(id=file_id)
 
-    for file in File.objects(id=file_id):
+    for file in file_object:
         for line in file.lines:
             for data in line.data:
                 for var_and_value in data:
@@ -49,7 +49,7 @@ def view_file(file_id):
 
     for k,v in list_var_value: series[k].append(v)
 
-    return render_template('view_file.html', files=File.objects(id=file_id), series=series.items())
+    return render_template('view_file.html', files=file_object, series=series.items())
 
 @app.route("/compare_files/<files_id>")
 def compare_files(files_id):
