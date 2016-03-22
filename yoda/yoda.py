@@ -6,6 +6,7 @@ import sys
 import traceback
 import inspect
 import types
+import timeit
 
 from mongoengine import *
 
@@ -51,16 +52,13 @@ class Yoda(bdb.Bdb):
 
     def user_line(self, frame):
         lineno = frame.f_lineno-1
-        #print(self.json_results[frame.f_globals['__file__']][lineno])
-        if self._filter_locals(frame.f_locals):
-            print(self._filter_locals(frame.f_locals))
-        if self._filter_locals(frame.f_locals):
-            self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
-        #print(lineno, self._filter_locals(frame.f_locals))
+        print("------",lineno,self._filter_locals(frame.f_locals))
+        self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
         self.set_step()
 
     def user_return(self, frame, value):
 
+        #TODO : If there is no user_return event it doesn't save in the db..
         file = open(frame.f_globals['__file__'], 'r')
         file_content = file.read()
         file.close()
@@ -68,7 +66,7 @@ class Yoda(bdb.Bdb):
         if self.json_results and file_content:
             for module_file, lines in self.json_results.items():
                 if settings.DEBUG:
-                    pass
+                    print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
                 else:
                     item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
                     for lineno, data in sorted(lines.items()):
@@ -76,6 +74,7 @@ class Yoda(bdb.Bdb):
                         item.lines.append(line)
 
                     item.save()
+                    print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
 
 
             self._clear_cache()
