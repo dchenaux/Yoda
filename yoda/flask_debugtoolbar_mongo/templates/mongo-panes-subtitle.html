@@ -1,0 +1,5 @@
+{{ count }} op. in {{ time }}ms
+({% for o, n, t in operations %}
+    {{ n }}{{ o|first|capitalize }}
+    {% if not loop.last %} / {% endif %}
+{% endfor %})
