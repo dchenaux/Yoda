@@ -1,3 +1,8 @@
 .syntaxhighlighter table .container:before {
     display: none !important;
 }
+
+.h-scroll {
+    height: 90vh; /* %-height of the viewport */
+    overflow: auto;
+}

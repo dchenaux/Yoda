@@ -19,7 +19,8 @@
 
     <script type="text/javascript">
     $(function () {
-        $('#container').highcharts({
+        {% for k in series.keys() %}
+        $('#container{{ k }}').highcharts({
             title: {
                 text: '',
                 x: -20 //center
@@ -56,42 +57,47 @@
                 borderWidth: 0
             },
             series: [
-            {%for k, v in series%}
+                {% for var in series[k] %}
                 {
-                    name: '{{k}}',
-                    data: {{v}}
+                    name: '{{ var }}',
+                    data: {{ series[k][var] }}
                 },
-            {%endfor%}
+                {% endfor %}
             ]
         });
+        {% endfor %}
     });
     </script>
 {% endblock %}
 
 
 {% block content %}
-    <div class="container">
-        {{ series }}
+    <div class="container-fluid">
         <div class="row">
             {% for file in files %}
+                {% if files.count() > 1 %}
+                    <div class="col-md-6 h-scroll">
+                {% else %}
+                    <div class="container">
+                {% endif %}
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Timestamp : {{file.timestamp}}</p>
-                <div id="container" style="min-width: 310px; height: 300px; max-width: 1000px; margin: 50px auto"></div>
+                <div id="container{{file.id}}" style="min-width: 310px; height: 300px; max-width: 1000px; margin: 50px auto"></div>
                 <div class="col-md-8">
                     <pre class="brush: py">{{file.content}}</pre>
                 </div>
                 <div class="col-md-4">
-                    <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel-group" id="accordion{{file.id}}" role="tablist" aria-multiselectable="true">
                     {% for line in file.lines %}
                         <div class="panel panel-default">
-                            <div class="panel-heading" role="tab" id="heading{{line.lineno}}">
+                            <div class="panel-heading" role="tab" id="heading{{file.id}}{{line.lineno}}">
                                 <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion" href="#collapse{{line.lineno}}" aria-expanded="false" aria-controls="collapse{{line.lineno}}">
+                                <a data-toggle="collapse" data-parent="#accordion{{file.id}}" href="#collapse{{file.id}}{{line.lineno}}" aria-expanded="false" aria-controls="collapse{{line.lineno}}">
                                   Line : {{line.lineno}}
                                 </a>
                                 </h4>
                             </div>
-                            <div id="collapse{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
+                            <div id="collapse{{file.id}}{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
                                 <div class="panel-body">
                                     {% for set in line.data%}
                                     <p>{{set}}</p>
@@ -102,7 +108,11 @@
                     {% endfor %}
                     </div>
                 </div>
+                {% if files.count() > 1 %}
+                    </div>
+                {% endif %}
                 {% endfor %}
+
         </div>
     </div>
 {% endblock %}
