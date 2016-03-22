@@ -29,7 +29,7 @@ setup(
     license=__license__,
     packages=find_packages(),
 
-    install_requires=['mongoengine>=0.10.6', 'Flask>=0.10.1', 'Flask-Bootstrap>=3.3.5.7', 'flask-mongoengine>=0.7.5'],
+    install_requires=['mongoengine>=0.10.6', 'Flask>=0.10.1', 'Flask-Bootstrap>=3.3.5.7', 'flask-mongoengine>=0.7.5', 'flask_debugtoolbar>=0.10.0'],
     dependency_links=[],
     scripts=['yoda/main.py', 'yoda/yoda.py', 'yoda/docdef.py', 'yoda/settings.py'],
 
