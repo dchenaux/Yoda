@@ -6,3 +6,7 @@
     height: 90vh; /* %-height of the viewport */
     overflow: auto;
 }
+
+.navbar {
+    margin-bottom: 0;
+}
