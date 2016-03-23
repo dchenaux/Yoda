@@ -99,8 +99,8 @@
                             </div>
                             <div id="collapse{{file.id}}{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
                                 <div class="panel-body">
-                                    {% for set in line.data%}
-                                    <p>{{set}}</p>
+                                    {% for k,v in line.data.items() %}
+                                    <p>{{k}} {{ v }}</p>
                                     {%endfor%}
                                 </div>
                             </div>

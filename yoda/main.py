@@ -46,15 +46,12 @@ def view_file(files_id):
     files_object = File.objects(id__in=re.split('&', files_id))
 
     for file in files_object:
-        list_var_value = []
         serie = defaultdict(list)
         for line in file.lines:
-            for data in line.data:
-                for var_and_value in data:
-                    list_var_value.append(var_and_value)
-        for k,v in list_var_value: serie[k].append(v)
+            for k,listv in line.data.items():
+                for v in listv:
+                    serie[k].append(v)
         series[file.id] = serie
-
 
     return render_template('view_files.html', files=files_object, series=series)
 

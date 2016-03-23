@@ -17,7 +17,7 @@ from docdef import *
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
-    instrumented_types = (int, str)
+    instrumented_types = (int, float)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
 
     def __init__(self):
@@ -27,16 +27,17 @@ class Yoda(bdb.Bdb):
         self._clear_cache()
 
     def _clear_cache(self):
-        self.json_results = defaultdict(lambda: defaultdict(list))
+        self.json_results = defaultdict(defaultdict)
 
     def _filter_locals(self, local_vars):
-        new_locals = []
+        new_locals = {}
         for name, value in list(local_vars.items()):
             if name.startswith('__'):
                 continue
             if not isinstance(value, self.instrumented_types):
                 continue
-            new_locals.append((name, value))
+            new_locals[name] = [value]
+
         return new_locals
 
     def _get_git_revision_short_hash(self):
@@ -50,8 +51,28 @@ class Yoda(bdb.Bdb):
 
     def user_line(self, frame):
         lineno = frame.f_lineno-1
-        print("------",frame.f_globals['__file__'],lineno,self._filter_locals(frame.f_locals))
-        self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
+        locals = self._filter_locals(frame.f_locals)
+        filename = frame.f_globals['__file__']
+
+        if not self.json_results:
+            self.json_results[filename][lineno] = locals
+        else :
+            for module_file, lines in self.json_results.items():
+                keylist = []
+                for k in lines.keys():
+                    keylist.append(k)
+            if lineno not in keylist:
+                self.json_results[filename][lineno] = locals
+            else:
+                for k in locals:
+                    for v in locals[k]:
+                        if k in self.json_results[filename][lineno]:
+                            self.json_results[frame.f_globals['__file__']][lineno][k].append(v)
+                        else:
+                            self.json_results[frame.f_globals['__file__']][lineno][k] = [v]
+
+        print('>>', lineno, self.json_results[frame.f_globals['__file__']][lineno])
+
         self.set_step()
 
     def user_return(self, frame, value):
@@ -69,20 +90,24 @@ class Yoda(bdb.Bdb):
         sys.settrace(None)
 
         if self.json_results:
-            for module_file, lines in self.json_results.items():
-                if 'yoda.py' not in module_file:
-                    file = open(module_file, 'r')
-                    file_content = file.read()
-                    file.close()
 
-                    if file_content:
-                        item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
-                        for lineno, data in sorted(lines.items()):
-                            line = Line(lineno = lineno, data = data)
-                            item.lines.append(line)
+            if settings.DEBUG:
+                pass
+            else:
+                for module_file, lines in self.json_results.items():
+                    if 'yoda.py' not in module_file:
+                        file = open(module_file, 'r')
+                        file_content = file.read()
+                        file.close()
 
-                        item.save()
-            self._clear_cache()
+                        if file_content:
+                            item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
+                            for lineno, data in sorted(lines.items()):
+                                line = Line(lineno = lineno, data = data)
+                                item.lines.append(line)
+
+                            item.save()
+                self._clear_cache()
         print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
 
 db = Yoda()

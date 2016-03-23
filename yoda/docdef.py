@@ -3,7 +3,7 @@ from mongoengine import *
 
 class Line(EmbeddedDocument):
     lineno = IntField()
-    data = ListField()
+    data = DictField()
 
 
 class File(Document):
