@@ -117,7 +117,7 @@ def _remove(collection_self, spec_or_id, safe=False, **kwargs):
     result = _original_methods['remove'](
         collection_self,
         spec_or_id,
-        safe=safe,
+        #safe=safe,
         **kwargs
     )
     total_time = (time.time() - start_time) * 1000
@@ -125,7 +125,7 @@ def _remove(collection_self, spec_or_id, safe=False, **kwargs):
     __traceback_hide__ = True
     removes.append({
         'spec_or_id': spec_or_id,
-        'safe': safe,
+        #'safe': safe,
         'time': total_time,
         'stack_trace': _get_stacktrace(),
     })
