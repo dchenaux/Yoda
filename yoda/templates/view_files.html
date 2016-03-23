@@ -57,7 +57,7 @@
                 borderWidth: 0
             },
             series: [
-                {% for var in series[k] %}
+                {% for var in series[k]|sort %}
                 {
                     name: '{{ var }}',
                     data: {{ series[k][var] }}
@@ -99,7 +99,7 @@
                             </div>
                             <div id="collapse{{file.id}}{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
                                 <div class="panel-body">
-                                    {% for k,v in line.data.items() %}
+                                    {% for k,v in line.data.items()|sort %}
                                     <p>{{k}} {{ v }}</p>
                                     {%endfor%}
                                 </div>
