@@ -39,7 +39,7 @@ of space and time
 * In this interface the user should have at least these possibilites :
   * Filter the different runs by date, commit identifier and author of the run | *done*
   * Delete a run | *done*
-* The user should be able to open at least two different runs in order to be able to compare them. | *in progress*
+* The user should be able to open at least two different runs in order to be able to compare them. | *done*
 
 ### Experiments
   * Detailed workflow on experiments
