@@ -61,12 +61,27 @@
     </div>
 
     <div class="container">
+        <div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    {% if category == 'message' %}
+                      <div class="alert alert-success" role="alert">
+                    {% else %}
+                      <div class="alert alert-{{ category }}" role="alert">
+                    {% endif %}
+                      {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        </div>
         <div class="row">
             <table class="table" id="table">
                 <thead>
                     <tr>
                         <th>Action</th>
-                        <th>Timestamp</th>
+                        <th>Date</th>
                         <th>Filename</th>
                         <th>Revision</th>
                         <th>User</th>
@@ -82,7 +97,7 @@
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </a>
                     </td>
-                    <td>{{ file.timestamp }}</td>
+                    <td>{{ file.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                     <td>{{ file.filename }}</td>
                     <td>{{ file.revision }}</td>
                     <td>{{ file.user }}</td>

@@ -5,7 +5,7 @@ from pprint import pprint
 
 from mongoengine import *
 
-from flask import Flask, render_template, redirect, url_for
+from flask import Flask, render_template, redirect, url_for, flash
 from flask.ext.mongoengine import MongoEngine
 from flask_bootstrap import Bootstrap
 from flask_debugtoolbar import DebugToolbarExtension
@@ -61,6 +61,7 @@ def view_file(files_id):
 @app.route("/remove_file/<file_id>")
 def remove_file(file_id):
     File.objects(id=file_id).delete()
+    flash('The entry %s was successfully deleted' % file_id)
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
