@@ -11,9 +11,10 @@ from flask_bootstrap import Bootstrap
 from flask_debugtoolbar import DebugToolbarExtension
 
 from docdef import *
+import settings
 
 app = Flask(__name__)
-app.config['MONGODB_DB'] = 'yoda'
+app.config['MONGODB_DB'] = settings.MONGODB
 app.config['SECRET_KEY'] = "b\xac\xea&\x9d\x86\x98Da?\xcaL\x146\x13\x83\x82.$\x91\xee\x03\xe3\x95"
 app.debug = True
 
@@ -50,7 +51,8 @@ def view_file(files_id):
         for line in file.lines:
             for k,listv in line.data.items():
                 for v in listv:
-                    serie[k].append(v)
+                    if type(v) is (int or float):
+                        serie[k].append(v)
         series[file.id] = serie
 
     return render_template('view_files.html', files=files_object, series=series)

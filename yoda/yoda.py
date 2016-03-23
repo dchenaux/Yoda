@@ -17,7 +17,7 @@ from docdef import *
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
-    instrumented_types = (int, float)
+    instrumented_types = (int, float, str)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
 
     prev_lineno = 0
@@ -25,7 +25,7 @@ class Yoda(bdb.Bdb):
     def __init__(self):
         bdb.Bdb.__init__(self)
         if not settings.DEBUG: # If DEBUG is to FALSE connect to mongodb
-            connect('yoda')
+            connect(settings.MONGODB)
         self._clear_cache()
 
     def _clear_cache(self):
@@ -49,6 +49,7 @@ class Yoda(bdb.Bdb):
         return subprocess.check_output(['git', 'config', 'user.name'])
 
     def user_call(self, frame, args):
+        print("EHEHEHEH")
         self.set_step() # continue
 
     def user_line(self, frame):
@@ -58,25 +59,25 @@ class Yoda(bdb.Bdb):
 
         locals = self._filter_locals(frame.f_locals)
         filename = frame.f_globals['__file__']
-
-        if not self.json_results:
-            self.json_results[filename][self.prev_lineno] = locals
-        else :
-            for module_file, lines in self.json_results.items():
-                keylist = []
-                for k in lines.keys():
-                    keylist.append(k)
-            if self.prev_lineno not in keylist:
+        if locals:
+            if not self.json_results:
                 self.json_results[filename][self.prev_lineno] = locals
-            else:
-                for k in locals:
-                    for v in locals[k]:
-                        if k in self.json_results[filename][self.prev_lineno]:
-                            self.json_results[frame.f_globals['__file__']][self.prev_lineno][k].append(v)
-                        else:
-                            self.json_results[frame.f_globals['__file__']][self.prev_lineno][k] = [v]
+            else :
+                for module_file, lines in self.json_results.items():
+                    keylist = []
+                    for k in lines.keys():
+                        keylist.append(k)
+                if self.prev_lineno not in keylist:
+                    self.json_results[filename][self.prev_lineno] = locals
+                else:
+                    for k in locals:
+                        for v in locals[k]:
+                            if k in self.json_results[filename][self.prev_lineno]:
+                                self.json_results[frame.f_globals['__file__']][self.prev_lineno][k].append(v)
+                            else:
+                                self.json_results[frame.f_globals['__file__']][self.prev_lineno][k] = [v]
 
-        print('>>', lineno, self.prev_lineno, self.json_results[frame.f_globals['__file__']][self.prev_lineno])
+            print('>>', lineno, self.prev_lineno, self.json_results[frame.f_globals['__file__']][self.prev_lineno])
 
         self.prev_lineno = lineno
 
