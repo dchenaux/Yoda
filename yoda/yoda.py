@@ -14,7 +14,6 @@ import settings
 from docdef import *
 
 
-
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
@@ -47,42 +46,43 @@ class Yoda(bdb.Bdb):
         return subprocess.check_output(['git', 'config', 'user.name'])
 
     def user_call(self, frame, args):
-        # TODO: may be also flush on call
         self.set_step() # continue
 
     def user_line(self, frame):
         lineno = frame.f_lineno-1
-        print("------",lineno,self._filter_locals(frame.f_locals))
+        print("------",frame.f_globals['__file__'],lineno,self._filter_locals(frame.f_locals))
         self.json_results[frame.f_globals['__file__']][lineno].append(self._filter_locals(frame.f_locals))
         self.set_step()
 
     def user_return(self, frame, value):
-
-        #TODO : If there is no user_return event it doesn't save in the db..
-        file = open(frame.f_globals['__file__'], 'r')
-        file_content = file.read()
-        file.close()
-
-        if self.json_results and file_content:
-            for module_file, lines in self.json_results.items():
-                if settings.DEBUG:
-                    print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
-                else:
-                    item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
-                    for lineno, data in sorted(lines.items()):
-                        line = Line(lineno = lineno, data = data)
-                        item.lines.append(line)
-
-                    item.save()
-                    print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
-
-
-            self._clear_cache()
         self.set_step()  # continue
 
     def user_exception(self, frame, exception):
         name = frame.f_code.co_name or "<unknown>"
         print("exception in", name, exception)
         self.set_continue()  # continue
+
+    def set_quit(self):
+        self.stopframe = self.botframe
+        self.returnframe = None
+        self.quitting = True
+        sys.settrace(None)
+
+        if self.json_results:
+            for module_file, lines in self.json_results.items():
+                if 'yoda.py' not in module_file:
+                    file = open(module_file, 'r')
+                    file_content = file.read()
+                    file.close()
+
+                    if file_content:
+                        item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
+                        for lineno, data in sorted(lines.items()):
+                            line = Line(lineno = lineno, data = data)
+                            item.lines.append(line)
+
+                        item.save()
+            self._clear_cache()
+        print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
 
 db = Yoda()
