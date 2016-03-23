@@ -81,7 +81,7 @@
                     <div class="container">
                 {% endif %}
                 <h2>{{ file.filename }}</h2>
-                <p>Revision : {{file.revision}}, Timestamp : {{file.timestamp}}</p>
+                <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
                 <div id="container{{file.id}}" style="min-width: 310px; height: 300px; max-width: 1000px; margin: 50px auto"></div>
                 <div class="col-md-8">
                     <pre class="brush: py">{{file.content}}</pre>
