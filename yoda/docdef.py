@@ -5,6 +5,10 @@ class Line(EmbeddedDocument):
     lineno = IntField()
     data = DictField()
 
+class Frame(EmbeddedDocument):
+    name = StringField()
+    lines = ListField(EmbeddedDocumentField(Line))
+
 
 class File(Document):
     user = StringField()
@@ -12,4 +16,4 @@ class File(Document):
     filename = StringField()
     timestamp = DateTimeField()
     content = StringField()
-    lines = ListField(EmbeddedDocumentField(Line))
+    frames = ListField()
