@@ -1,4 +1,5 @@
 import yoda
+import sys
 
 yoda.db.set_trace()
 
@@ -15,11 +16,5 @@ def spam(arg):
     return result
 
 x = spam(8)
-
-def spam2(arg):
-    result = arg*4
-    return result
-
-x = spam2(8)
 
 yoda.db.set_quit()
