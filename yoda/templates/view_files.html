@@ -9,12 +9,6 @@
 {% block scripts %}
     {{super()}}
     <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='syntaxhighlighter/shCore.js') }}"></script>
-    <script type=text/javascript src="{{ url_for('static', filename='syntaxhighlighter/shBrushPython.js') }}"></script>
-
-    <script type="text/javascript">
-        SyntaxHighlighter.all()
-    </script>
 
     <script type="text/javascript">
     $(function () {
@@ -86,7 +80,7 @@
                 <!-- File source -->
                 <div class="col-md-6">
                     <div class="file-source">
-                        {% highlight 'python', lineno='table' %}{{file.content}}{% endhighlight %}
+                        {{file.content|safe}}
                     </div>
                 </div>
                 <!-- End of file source -->

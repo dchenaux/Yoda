@@ -9,13 +9,13 @@ from flask import Flask, render_template, redirect, url_for, flash
 from flask.ext.mongoengine import MongoEngine
 from flask_bootstrap import Bootstrap
 from flask_debugtoolbar import DebugToolbarExtension
-import jinja2_highlight
+
+from pygments import highlight
+from pygments.lexers import PythonLexer
+from pygments.formatters import HtmlFormatter
 
 from docdef import *
 import settings
-
-jinja_options = dict(Flask.jinja_options)
-jinja_options.setdefault('extensions',[]).append('jinja2_highlight.HighlightExtension')
 
 
 app = Flask(__name__)
@@ -59,6 +59,9 @@ def view_file(files_id):
                     if type(v) is (int or float):
                         serie[k].append(v)
         series[file.id] = serie'''
+
+    for file in files_object:
+        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True))
 
     return render_template('view_files.html', files=files_object, series=series)
 
