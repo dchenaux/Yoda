@@ -212,7 +212,7 @@ th {
   a[href^="javascript:"]:after {
     content: "";
   }
-  pre,
+  /*pre,*/
   blockquote {
     border: 1px solid #999;
 
@@ -1557,7 +1557,7 @@ kbd kbd {
   -webkit-box-shadow: none;
           box-shadow: none;
 }
-pre {
+/*pre {
   display: block;
   padding: 9.5px;
   margin: 0 0 10px;
@@ -1577,7 +1577,7 @@ pre code {
   white-space: pre-wrap;
   background-color: transparent;
   border-radius: 0;
-}
+}*/
 .pre-scrollable {
   max-height: 340px;
   overflow-y: scroll;
