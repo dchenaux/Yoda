@@ -2,9 +2,8 @@
 
 {% block styles %}
     {{super()}}
-    <link rel="stylesheet" href="{{url_for('static', filename='syntaxhighlighter/shCore.css')}}">
-    <link rel="stylesheet" href="{{url_for('static', filename='syntaxhighlighter/shThemeDefault.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='default.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='pygments/code.css')}}">
 {% endblock %}
 
 {% block scripts %}
@@ -83,35 +82,47 @@
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
                 <div id="container{{file.id}}" style="min-width: 310px; height: 300px; max-width: 1000px; margin: 50px auto"></div>
-                <div class="col-md-8">
-                    <pre class="brush: py">{{file.content}}</pre>
-                </div>
-                <div class="col-md-4">
-                    <div class="panel-group" id="accordion{{file.id}}" role="tablist" aria-multiselectable="true">
-                    {% for line in file.lines %}
-                        <div class="panel panel-default">
-                            <div class="panel-heading" role="tab" id="heading{{file.id}}{{line.lineno}}">
-                                <h4 class="panel-title">
-                                <a data-toggle="collapse" data-parent="#accordion{{file.id}}" href="#collapse{{file.id}}{{line.lineno}}" aria-expanded="false" aria-controls="collapse{{line.lineno}}">
-                                  Line : {{line.lineno}}
-                                </a>
-                                </h4>
-                            </div>
-                            <div id="collapse{{file.id}}{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
-                                <div class="panel-body">
-                                    {% for k,v in line.data.items()|sort %}
-                                    <p>{{k}} {{ v }}</p>
-                                    {%endfor%}
-                                </div>
-                            </div>
-                          </div>
-                    {% endfor %}
+
+                <!-- File source -->
+                <div class="col-md-6">
+                    <div class="file-source">
+                        {% highlight 'python', lineno='table' %}{{file.content}}{% endhighlight %}
                     </div>
+                </div>
+                <!-- End of file source -->
+
+                <div class="col-md-6">
+                    {% for frame in file.frames %}
+                        {{ frame.name }}
+                        <div class="panel-group" id="accordion{{frame.name|striptags|striptags}}" role="tablist" aria-multiselectable="true">
+
+                        {% for line in frame.lines %}
+                            <div class="panel panel-default">
+                                <div class="panel-heading" role="tab" id="heading{{frame.name|striptags}}{{line.lineno}}">
+                                    <h4 class="panel-title">
+                                    <a data-toggle="collapse" data-parent="#accordion{{frame.name|striptags}}" href="#collapse{{frame.name|striptags}}{{line.lineno}}" aria-expanded="false" aria-controls="collapse{{line.lineno}}">
+                                      Line : {{line.lineno}}
+                                    </a>
+                                    </h4>
+                                </div>
+                                <div id="collapse{{frame.name|striptags}}{{line.lineno}}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading{{line.lineno}}">
+                                    <div class="panel-body">
+
+                                        {% for k,v in line.data.items()|sort %}
+                                        <p>{{k}} {{ v }}</p>
+                                        {%endfor%}
+
+                                    </div>
+                                </div>
+                              </div>
+                        {% endfor %}
+                        </div>
+                    {% endfor %}
                 </div>
                 {% if files.count() > 1 %}
                     </div>
                 {% endif %}
-                {% endfor %}
+            {% endfor %}
 
         </div>
     </div>

@@ -9,9 +9,14 @@ from flask import Flask, render_template, redirect, url_for, flash
 from flask.ext.mongoengine import MongoEngine
 from flask_bootstrap import Bootstrap
 from flask_debugtoolbar import DebugToolbarExtension
+import jinja2_highlight
 
 from docdef import *
 import settings
+
+jinja_options = dict(Flask.jinja_options)
+jinja_options.setdefault('extensions',[]).append('jinja2_highlight.HighlightExtension')
+
 
 app = Flask(__name__)
 app.config['MONGODB_DB'] = settings.MONGODB
@@ -38,7 +43,7 @@ Bootstrap(app)
 
 @app.route("/")
 def index():
-    return render_template('index.html', files=File.objects.exclude("lines", "content").order_by('-timestamp'))
+    return render_template('index.html', files=File.objects.exclude("frames", "content").order_by('-timestamp'))
 
 @app.route("/view_files/<files_id>")
 def view_file(files_id):
@@ -46,14 +51,14 @@ def view_file(files_id):
     series = {}
     files_object = File.objects(id__in=re.split('&', files_id))
 
-    for file in files_object:
+    '''for file in files_object:
         serie = defaultdict(list)
         for line in file.lines:
             for k,listv in line.data.items():
                 for v in listv:
                     if type(v) is (int or float):
                         serie[k].append(v)
-        series[file.id] = serie
+        series[file.id] = serie'''
 
     return render_template('view_files.html', files=files_object, series=series)
 
