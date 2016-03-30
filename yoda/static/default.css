@@ -11,15 +11,9 @@
 /* View file specific classes */
 
 pre {
-    border: 0;
-    border-radius: 0;
-    background-color: transparent;
-    line-height: 15px;
+    line-height: 1.3;
 }
-pre span{
-    margin: 0;
-    padding-bottom: 10px;
-}
+
 
 .file-source {
     border: 1px solid #ccc;
