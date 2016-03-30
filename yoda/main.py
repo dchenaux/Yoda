@@ -7,7 +7,6 @@ from mongoengine import *
 
 from flask import Flask, render_template, redirect, url_for, flash
 from flask.ext.mongoengine import MongoEngine
-from flask_bootstrap import Bootstrap
 from flask_debugtoolbar import DebugToolbarExtension
 
 from pygments import highlight
@@ -39,7 +38,6 @@ app.config['DEBUG_TB_PANELS'] = [
 toolbar = DebugToolbarExtension(app)
 
 db = MongoEngine(app)
-Bootstrap(app)
 
 @app.route("/")
 def index():
