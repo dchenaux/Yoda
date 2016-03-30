@@ -1,5 +1,4 @@
 Mongoengine
 Flask
 Flask-mongoengine
-Flask-bootstrap
 flask_debugtoolbar
