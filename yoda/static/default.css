@@ -14,6 +14,11 @@ pre {
     border: 0;
     border-radius: 0;
     background-color: transparent;
+    line-height: 15px;
+}
+pre span{
+    margin: 0;
+    padding-bottom: 10px;
 }
 
 .file-source {
