@@ -15,6 +15,12 @@ def spam(arg):
     result = arg*4
     return result
 
+def spam2(arg):
+    result = arg*4
+    return result
+
 x = spam(8)
+
+x = spam2(18)
 
 yoda.db.set_quit()
