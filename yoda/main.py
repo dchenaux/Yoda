@@ -51,14 +51,15 @@ def view_file(files_id):
     series = {}
     files_object = File.objects(id__in=re.split('&', files_id))
 
-    '''for file in files_object:
+    for file in files_object:
         serie = defaultdict(list)
-        for line in file.lines:
-            for k,listv in line.data.items():
-                for v in listv:
-                    if type(v) is (int or float):
-                        serie[k].append(v)
-        series[file.id] = serie'''
+        for frame in file.frames:
+            for line in frame.lines:
+                for k,listv in line.data.items():
+                    for v in listv:
+                        if type(v) is (int or float):
+                            serie[k].append(v)
+        series[file.id] = serie
 
     for file in files_object:
         file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True))
