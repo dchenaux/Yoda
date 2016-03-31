@@ -60,7 +60,11 @@ def view_file(files_id):
         series[file.id] = serie
 
     for file in files_object:
-        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True))
+        executed_lines = []
+        for frame in file.frames:
+            for line in frame.lines:
+                executed_lines.append(line.lineno)
+        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
 
     return render_template('view_files.html', files=files_object, series=series)
 
