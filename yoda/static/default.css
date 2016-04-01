@@ -21,6 +21,7 @@ pre .hll {
 
 .file-source {
     border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
 .highlighttable table .container:before {
