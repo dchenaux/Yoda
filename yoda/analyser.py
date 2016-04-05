@@ -106,7 +106,7 @@ class Yoda(bdb.Bdb):
                 pass
             else:
                 for module_file, frames in self.json_results.items():
-                    if 'analize.py' not in module_file:
+                    if 'analyser.py' not in module_file:
                         file = open(module_file, 'r')
                         file_content = file.read()
                         file.close()

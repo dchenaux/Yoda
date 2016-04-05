@@ -1,7 +1,7 @@
-import yoda.analize
+import yoda.analyser
 import sys
 
-yoda.analize.db.set_trace()
+yoda.analyser.db.set_trace()
 
 a = 1
 b = 3
@@ -22,5 +22,5 @@ def spam2(arg):
 x = spam(8)
 
 x = spam2(18)
-yoda.analize.db.set_quit()
+yoda.analyser.db.set_quit()
 
