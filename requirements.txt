@@ -2,3 +2,4 @@ Mongoengine
 Flask
 Flask-mongoengine
 flask_debugtoolbar
+pygments

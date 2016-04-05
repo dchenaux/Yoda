@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 
 __author__      = 'David Chenaux'
 __license__     = 'Modified BSD license'
-__version__     = '0.3'
+__version__     = '0.4.0'
 __maintainer__  = __author__
 __email__       = 'd.chenaux@gmail.com'
 __url__         = 'https://github.com/dchenaux/yoda'
@@ -28,13 +28,13 @@ setup(
 
     license=__license__,
     packages=find_packages(),
+    include_package_data=True,
 
-    install_requires=['mongoengine>=0.10.6', 'Flask>=0.10.1', 'Flask-Bootstrap>=3.3.5.7', 'flask-mongoengine>=0.7.5', 'flask_debugtoolbar>=0.10.0'],
+    install_requires=['mongoengine>=0.10.6', 'Flask>=0.10.1', 'flask-mongoengine>=0.7.5', 'flask_debugtoolbar>=0.10.0', 'pygments>=2.0.2'],
     dependency_links=[],
-    scripts=['yoda/main.py', 'yoda/yoda.py', 'yoda/docdef.py', 'yoda/settings.py'],
 
     classifiers=[
-        'Development Status :: 0.1 - Alpha',
+        'Development Status :: 0.4.0 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: Modified BSD license',

@@ -11,8 +11,8 @@ import pprint
 
 from mongoengine import *
 
-import settings
-from docdef import *
+import yoda.settings as settings
+from yoda.docdef import *
 
 
 class Yoda(bdb.Bdb):
@@ -106,7 +106,7 @@ class Yoda(bdb.Bdb):
                 pass
             else:
                 for module_file, frames in self.json_results.items():
-                    if 'yoda.py' not in module_file:
+                    if 'analize.py' not in module_file:
                         file = open(module_file, 'r')
                         file_content = file.read()
                         file.close()

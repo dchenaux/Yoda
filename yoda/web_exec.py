@@ -13,8 +13,8 @@ from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import HtmlFormatter
 
-from docdef import *
-import settings
+from yoda.docdef import *
+import yoda.settings as settings
 
 
 app = Flask(__name__)
@@ -32,7 +32,7 @@ app.config['DEBUG_TB_PANELS'] = [
     'flask_debugtoolbar.panels.logger.LoggingPanel',
     'flask_debugtoolbar.panels.profiler.ProfilerDebugPanel',
     # Add the MongoDB panel
-    'flask_debugtoolbar_mongo.panel.MongoDebugPanel',
+    'yoda.flask_debugtoolbar_mongo.panel.MongoDebugPanel',
 ]
 
 toolbar = DebugToolbarExtension(app)

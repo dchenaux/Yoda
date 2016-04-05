@@ -13,6 +13,7 @@
     $(document).ready(function(){
         $('#bt-showall').click(function(){
             $('[id^=panel-]').fadeIn('slow');
+            $('.inlinesparkline').sparkline();
         })
         $('#bt-closeall').click(function(){
             $('[id^=panel-]').fadeOut('slow');
@@ -23,7 +24,8 @@
                 {% for line in frame.lines %}
                     $('a[href$="#-{{ line.lineno }}"]').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
-                        /*$("html, body").animate({ scrollTop: $(document).height() }, 'slow');*/
+                        $("html, body").animate({ scrollTop: $(document).height() });
+                        $('.inlinesparkline').sparkline();
                     })
                     $('#close-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeOut( 'slow' );
@@ -34,22 +36,24 @@
     });
     </script>
     <script type="text/javascript">
-    $(document).ready(function() {
-        $(document).scroll(function () {
-            var scroll = $(this).scrollTop();
-            var topDist = $("#file-source-col").offset().top
-            console.log(scroll, topDist)
-            if (scroll+20 > topDist) {
-                $('#file-source').css({"position":"fixed","top":"20px", "width": $("#file-source-col").width()});
-            }
-            else {
-                $('#file-source').css({"position":"static"});
-            }
+        /* Script for fixing the source code div */
+        $(document).ready(function() {
+            $(document).scroll(function () {
+                var scroll = $(this).scrollTop();
+                var topDist = $("#file-source-col").offset().top
+                if($("#file-source-col").height() < $("#data-col").height()){
+                    if (scroll+20 > topDist) {
+                        $('#file-source').css({"position":"fixed","top":"20px", "width": $("#file-source-col").width()});
+                    }
+                    else {
+                        $('#file-source').css({"position":"static"});
+                    }
+                }
+            });
         });
-    });
     </script>
-    <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
 
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
     <script type="text/javascript">
     $(function () {
         {% for k in series.keys() %}
@@ -101,6 +105,8 @@
         {% endfor %}
     });
     </script>
+
+    <script type=text/javascript src="{{ url_for('static', filename='jquery.sparkline.min.js') }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -120,7 +126,7 @@
                 </div>
                 <!-- End of file source -->
 
-                <div class="col-md-6">
+                <div class="col-md-6" id="data-col">
                     <div class="alert alert-info" role="alert">Click on line number to get details or choose to show them all at once by clicking the following button</div>
                     <div class="btn-group" role="group" aria-label="..." style="margin-bottom: 1em">
                         <button type="button" class="btn btn-default" id="bt-showall">Show all</button>
@@ -136,7 +142,7 @@
                                 </div>
                                 <div class="panel-body">
                                     {% for k,v in line.data.items()|sort %}
-                                        <p><strong>{{k}}</strong> {{ v }}</p>
+                                        <p><strong>{{k}}</strong> {{ v }}</p><span class="inlinesparkline">1,4,4,7,5,9,10</span>
                                     {%endfor%}
                                 </div>
                             </div>
