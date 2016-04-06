@@ -142,7 +142,7 @@
                                 </div>
                                 <div class="panel-body">
                                     {% for k,v in line.data.items()|sort %}
-                                        <p><strong>{{k}}</strong> {{ v }}</p><span class="inlinesparkline">1,4,4,7,5,9,10</span>
+                                        <p><strong>{{k}}</strong>: {{ v }} <span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></p>
                                     {%endfor%}
                                 </div>
                             </div>
