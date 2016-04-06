@@ -21,6 +21,10 @@
             {% for frame in file.frames %}
 
                 {% for line in frame.lines %}
+                    $('a[href$="#{{ frame.name|replace("<", "")|replace(">", "") }}"]').click(function(){
+                        $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
+                        $("html, body").animate({ scrollTop: $(document).height() });
+                    })
                     $('a[href$="#-{{ line.lineno }}"]').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
                         $("html, body").animate({ scrollTop: $(document).height() });
@@ -34,7 +38,9 @@
     });
     </script>
    <script type="text/javascript">
-       $(function() {$('.inlinesparkline').sparkline('html', {type: 'line', disableHiddenCheck: true, height: '20px', width: '100px'});});
+       $(function() {
+           $('.inlinesparkline').sparkline('html', {type: 'line', disableHiddenCheck: true, height: '20px', width: '100px'});
+       });
    </script>
 
     <script type="text/javascript">
@@ -129,11 +135,21 @@
                 <!-- End of file source -->
 
                 <div class="col-md-6" id="data-col">
-                    <div class="alert alert-info" role="alert">Click on line number to get details or choose to show them all at once by clicking the following button</div>
-                    <div class="btn-group" role="group" aria-label="..." style="margin-bottom: 1em">
-                        <button type="button" class="btn btn-default" id="bt-showall">Show all</button>
-                        <button type="button" class="btn btn-default" id="bt-closeall">Close all</button>
+                    <div class="alert alert-info" role="alert">
+                        Click on a frame name or a line number to get details or choose to show them all at once by
+                        clicking the following button
                     </div>
+                    <p>
+                        <div class="btn-group pull-right" role="group" aria-label="..." style="margin-bottom: 1em">
+                            <button type="button" class="btn btn-default" id="bt-showall">Show all</button>
+                            <button type="button" class="btn btn-default" id="bt-closeall">Close all</button>
+                        </div>
+                        Analysed frames :
+                        {% for frame in file.frames %}
+                            <a href="#{{ frame.name|replace("<", "")|replace(">", "") }}">{{ frame.name }}</a>
+                        {% endfor %}
+                    </p>
+                    <p>&nbsp;</p>
                     {% for frame in file.frames %}
                         {% for line in frame.lines %}
 
