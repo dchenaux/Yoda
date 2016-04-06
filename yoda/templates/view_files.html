@@ -13,7 +13,6 @@
     $(document).ready(function(){
         $('#bt-showall').click(function(){
             $('[id^=panel-]').fadeIn('slow');
-            $('.inlinesparkline').sparkline();
         })
         $('#bt-closeall').click(function(){
             $('[id^=panel-]').fadeOut('slow');
@@ -25,7 +24,6 @@
                     $('a[href$="#-{{ line.lineno }}"]').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
                         $("html, body").animate({ scrollTop: $(document).height() });
-                        $('.inlinesparkline').sparkline();
                     })
                     $('#close-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeOut( 'slow' );
@@ -35,8 +33,12 @@
         {% endfor %}
     });
     </script>
+   <script type="text/javascript">
+       $(function() {$('.inlinesparkline').sparkline('html', {type: 'line', disableHiddenCheck: true, height: '20px', width: '100px'});});
+   </script>
+
     <script type="text/javascript">
-        /* Script for fixing the source code div */
+        /* Script for sticking the source code div */
         $(document).ready(function() {
             $(document).scroll(function () {
                 var scroll = $(this).scrollTop();
@@ -140,11 +142,24 @@
                                     {{ frame.name|replace("<", "")|replace(">", "") }} - {{ line.lineno }}
                                     <button class="close" id="close-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}">&times;</button>
                                 </div>
-                                <div class="panel-body">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Object</th>
+                                            <th>Values</th>
+                                            <th>Graph</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
                                     {% for k,v in line.data.items()|sort %}
-                                        <p><strong>{{k}}</strong>: {{ v }} <span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></p>
+                                        <tr>
+                                            <td>{{ k }}</td>
+                                            <td>{{ v }}</td>
+                                            <td><span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></td>
+                                        </tr>
                                     {%endfor%}
-                                </div>
+                                    </tbody>
+                                </table>
                             </div>
 
                         {% endfor %}
