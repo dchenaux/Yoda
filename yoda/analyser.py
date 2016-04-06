@@ -1,13 +1,37 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+"""
+The analyser is the central point of the yoda project. It analyses the given script and store the results in a mongodb
+collection. Configuration of the mongodb is done in the settings.py file.
+.. todo:: Use a better way to store settings in order to let the user change things
+`todo`
+
+This script can't be run directly and must be imported your own script in order to analyse it. Be sure to
+add the ``set_trace()`` function at the beginning and ``set_quit()`` and the end of the section of code you want to
+analyse.
+
+:Example:
+
+import yoda.analyser
+
+yoda.analyser.db.set_trace()
+
+a = 1
+b = 3
+
+for c in range(10):
+    d = c
+    print(c)
+yoda.analyser.db.set_quit()
+"""
+
 import bdb
 from collections import defaultdict
 from datetime import datetime
 import subprocess
 import sys
-import traceback
-import inspect
-import types
 import timeit
-import pprint
 
 from mongoengine import *
 
@@ -102,7 +126,6 @@ class Yoda(bdb.Bdb):
         if self.json_results:
 
             if settings.DEBUG:
-                #pprint.pprint(self.json_results)
                 pass
             else:
                 for module_file, frames in self.json_results.items():
@@ -124,5 +147,7 @@ class Yoda(bdb.Bdb):
                             item.save()
                 self._clear_cache()
         print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
+
+
 
 db = Yoda()
