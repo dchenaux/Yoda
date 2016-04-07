@@ -21,15 +21,15 @@
         /* Delete functions */
         $('#confirm-delete-many').click( function(){
             var checked = [];
-            $.each($("input[type='checkbox']:checked"),function(){ checked.push($(this).val());});
+            $.each($("input[type='checkbox']:checked").not('#check-all'),function(){ checked.push($(this).val());});
             $('#confirm-delete-many').data('href', 'remove_files/'+checked.join('&'))
         });
         $('#confirm-delete').on('show.bs.modal', function(e) {
             $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
             $('.debug-url').html('Delete URL: <strong>' + $(this).find('.btn-ok').attr('href') + '</strong>');
         });
-    </script>
-    <script type="text/javascript">
+
+        /* Checkbox functions */
         $('#compare').click( function() {
             var checked = [];
             $.each($("input[type='checkbox']:checked"),function(){ checked.push($(this).val());});
@@ -39,6 +39,9 @@
             else if (checked.length == 1) {document.location.href = 'view_files/'+checked;}
             else {document.location.href = 'view_files/'+checked.join("&");}
         });
+        $('#check-all').click( function(){
+            $("input[type='checkbox']").prop('checked', $('#check-all').prop("checked"));
+        })
     </script>
 {% endblock %}
 
@@ -117,7 +120,8 @@
                 </tbody>
             </table>
             <p>
-                For the selection:
+                <input type="checkbox" id="check-all"><label for="check-all">Check all</label>
+                <i style="margin-left: 2em">For the selection : </i>
                 <a href="#" id="compare"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Compare</a>
                 <a href="#" id="confirm-delete-many" data-href="" data-toggle="modal"
                    data-target="#confirm-delete">
