@@ -23,7 +23,6 @@
                 {% for line in frame.lines %}
                     $('a[href$="#{{ frame.name|replace("<", "")|replace(">", "") }}"]').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
-                        $("html, body").animate({ scrollTop: $(document).height() });
                     })
                     $('a[href$="#-{{ line.lineno }}"]').click(function(){
                         $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
@@ -39,7 +38,13 @@
     </script>
    <script type="text/javascript">
        $(function() {
-           $('.inlinesparkline').sparkline('html', {type: 'line', disableHiddenCheck: true, height: '20px', width: '100px'});
+           $('.inlinesparkline').sparkline('html', {
+               type: 'line',
+               disableHiddenCheck: true,
+               disableInteraction: true,
+               height: '20px',
+               width: '100px'
+           });
        });
    </script>
 
@@ -66,6 +71,7 @@
     $(function () {
         {% for k in series.keys() %}
         $('#container{{ k }}').highcharts({
+            credits: false,
             title: {
                 text: '',
                 x: -20 //center
@@ -170,7 +176,7 @@
                                     {% for k,v in line.data.items()|sort %}
                                         <tr>
                                             <td>{{ k }}</td>
-                                            <td>{{ v }}</td>
+                                            <td>{{ v|replace("[", "")|replace("]", "") }}</td>
                                             <td><span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></td>
                                         </tr>
                                     {%endfor%}
