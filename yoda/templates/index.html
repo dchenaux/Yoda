@@ -34,10 +34,9 @@
             var checked = [];
             $.each($("input[type='checkbox']:checked"),function(){ checked.push($(this).val());});
 
-            if (checked.length > 2) {alert("You are not allowed to compare more than 2 file");}
-            else if (checked.length == 0) {alert("Please select a file !");}
+            if (checked.length == 0) {alert("Please select a file !");}
             else if (checked.length == 1) {document.location.href = 'view_files/'+checked;}
-            else {document.location.href = 'view_files/'+checked.join("&");}
+            else {document.location.href = 'compare_files/'+checked.join("&");}
         });
         $('#check-all').click( function(){
             $("input[type='checkbox']").prop('checked', $('#check-all').prop("checked"));

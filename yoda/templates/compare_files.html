@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block styles %}
+    {{super()}}
+    <link rel="stylesheet" href="{{url_for('static', filename='default.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='pygments/code.css')}}">
+{% endblock %}
+
+{% block content %}
+    <div class="container">
+        {% for file in files %}
+             <div class="row">
+                <h3>{{ file.filename }}</h3>
+                <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
+                {% include "partials/filesource.html" %}
+                {% for frame in file.frames %}
+                    {{ frame.name }}
+                {% endfor %}
+             </div>
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -51,6 +51,23 @@ db = MongoEngine(app)
 
 # End of Flask configuration
 
+# Own functions
+
+
+def _colorize(files_object):
+    for file in files_object:
+        executed_lines = []
+        for frame in file.frames:
+            for line in frame.lines:
+                executed_lines.append(line.lineno)
+        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
+
+    return files_object
+
+
+# End of own functions
+
+# Flask pages
 @app.route("/")
 def index():
     """
@@ -80,14 +97,7 @@ def view_file(file_id):
                             serie[k].append(v)
         series[file.id] = serie
 
-    for file in file_object:
-        executed_lines = []
-        for frame in file.frames:
-            for line in frame.lines:
-                executed_lines.append(line.lineno)
-        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
-
-    return render_template('view_file.html', file=file_object, series=series)
+    return render_template('view_file.html', file=_colorize(file_object), series=series)
 
 @app.route("/remove_files/<files_id>")
 def remove_files(files_id):
@@ -104,6 +114,15 @@ def remove_files(files_id):
     else:
         flash('The entries %s were successfully deleted' % ', '.join(files_id))
     return redirect(url_for('index'))
+
+@app.route("/compare_files/<files_id>")
+def compare_files(files_id):
+    files_id = re.split('&', files_id)
+    files_object = File.objects(id__in=files_id)
+
+    return render_template('compare_files.html', files=_colorize(files_object))
+
+
 
 if __name__ == "__main__":
     app.run()
