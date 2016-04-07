@@ -10,6 +10,7 @@
     <script type=text/javascript src="{{ url_for('static', filename='jquery.dataTables.min.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='dataTables.bootstrap.min.js') }}"></script>
     <script type="text/javascript">
+        /* Generating datatables */
         $(document).ready( function () {
             $('#table').DataTable({
                 "order": [[ 1, "desc" ]]
@@ -17,6 +18,12 @@
         } );
      </script>
     <script type="text/javascript">
+        /* Delete functions */
+        $('#confirm-delete-many').click( function(){
+            var checked = [];
+            $.each($("input[type='checkbox']:checked"),function(){ checked.push($(this).val());});
+            $('#confirm-delete-many').data('href', 'remove_files/'+checked.join('&'))
+        });
         $('#confirm-delete').on('show.bs.modal', function(e) {
             $(this).find('.btn-ok').attr('href', $(e.relatedTarget).data('href'));
             $('.debug-url').html('Delete URL: <strong>' + $(this).find('.btn-ok').attr('href') + '</strong>');
@@ -37,7 +44,8 @@
 
 {% block content %}
 
-     <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+     <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+          aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
 
@@ -92,8 +100,11 @@
                 <tr>
                     <td>
                         <input type="checkbox" value="{{file.id}}">
-                        <a href="view_files/{{file.id}}"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a>
-                        <a href="#" data-href="remove_file/{{file.id}}" data-toggle="modal" data-target="#confirm-delete">
+                        <a href="view_file/{{file.id}}">
+                            <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
+                        </a>
+                        <a href="#" data-href="remove_files/{{file.id}}" data-toggle="modal"
+                           data-target="#confirm-delete">
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </a>
                     </td>
@@ -106,7 +117,12 @@
                 </tbody>
             </table>
             <p>
-                For the selection (max. 2 files): <a href="#" id="compare"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Compare</a>
+                For the selection:
+                <a href="#" id="compare"><span class="glyphicon glyphicon-search" aria-hidden="true"></span> Compare</a>
+                <a href="#" id="confirm-delete-many" data-href="" data-toggle="modal"
+                   data-target="#confirm-delete">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span> Delete
+                </a>
             </p>
             <p>{{ start }}</p>
         </div>

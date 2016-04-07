@@ -89,15 +89,20 @@ def view_file(file_id):
 
     return render_template('view_file.html', file=file_object, series=series)
 
-@app.route("/remove_file/<file_id>")
-def remove_file(file_id):
+@app.route("/remove_files/<files_id>")
+def remove_files(files_id):
     """
     Delete a run
-    :param file_id: passed in the url, unique identifier of a run
+    :param files_id: passed in the url, unique identifier of a run
     :return: redirects to index page
     """
-    File.objects(id=file_id).delete()
-    flash('The entry %s was successfully deleted' % file_id)
+    files_id = re.split('&', files_id)
+
+    File.objects(id__in=files_id).delete()
+    if len(files_id) == 1:
+        flash('The entry %s was successfully deleted' % str(files_id).strip('[]'))
+    else:
+        flash('The entries %s were successfully deleted' % ', '.join(files_id))
     return redirect(url_for('index'))
 
 if __name__ == "__main__":
