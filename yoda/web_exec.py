@@ -59,18 +59,18 @@ def index():
     """
     return render_template('index.html', files=File.objects.exclude("frames", "content").order_by('-timestamp'))
 
-@app.route("/view_files/<files_id>")
-def view_file(files_id):
+@app.route("/view_file/<file_id>")
+def view_file(file_id):
     """
     view_file page which gives detailed information about a single run
-    :param files_id: passed in the url, unique identifier of a run
-    :return: render the view_files.html template
+    :param file_id: passed in the url, unique identifier of a run
+    :return: render the view_file.html template
     """
 
     series = {}
-    files_object = File.objects(id__in=re.split('&', files_id))
+    file_object = File.objects(id=file_id)
 
-    for file in files_object:
+    for file in file_object:
         serie = defaultdict(list)
         for frame in file.frames:
             for line in frame.lines:
@@ -80,14 +80,14 @@ def view_file(files_id):
                             serie[k].append(v)
         series[file.id] = serie
 
-    for file in files_object:
+    for file in file_object:
         executed_lines = []
         for frame in file.frames:
             for line in frame.lines:
                 executed_lines.append(line.lineno)
         file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
 
-    return render_template('view_files.html', files=files_object, series=series)
+    return render_template('view_file.html', file=file_object, series=series)
 
 @app.route("/remove_file/<file_id>")
 def remove_file(file_id):

@@ -17,7 +17,7 @@
         $('#bt-closeall').click(function(){
             $('[id^=panel-]').fadeOut('slow');
         })
-        {% for file in files %}
+        {% for file in file %}
             {% for frame in file.frames %}
 
                 {% for line in frame.lines %}
@@ -71,7 +71,9 @@
     $(function () {
         {% for k in series.keys() %}
         $('#container{{ k }}').highcharts({
-            credits: false,
+            credits: {
+                enabled: false
+            },
             title: {
                 text: '',
                 x: -20 //center
@@ -125,7 +127,7 @@
 
 {% block content %}
     <div class="container">
-        {% for file in files %}
+        {% for file in file %}
             <div class="row">
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
