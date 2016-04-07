@@ -135,10 +135,12 @@
             </div>
             <div class="row">
                 <!-- File source -->
-                {% include "partials/filesource.html" %}
+                <div class="col-md-7" id="file-source-col">
+                    {% include "partials/filesource.html" %}
+                </div>
                 <!-- End of file source -->
 
-                <div class="col-md-6" id="data-col">
+                <div class="col-md-5" id="data-col">
                     <div class="alert alert-info" role="alert">
                         Click on a frame name or a line number to get details or choose to show them all at once by
                         clicking the following button

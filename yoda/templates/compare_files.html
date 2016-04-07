@@ -8,15 +8,26 @@
 
 {% block content %}
     <div class="container">
-        {% for file in files %}
-             <div class="row">
-                <h3>{{ file.filename }}</h3>
-                <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
-                {% include "partials/filesource.html" %}
-                {% for frame in file.frames %}
-                    {{ frame.name }}
-                {% endfor %}
-             </div>
-        {% endfor %}
+        <div class="row">
+            <h3>File comparaison</h3>
+            {% for file in files %}
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading"><h4>{{ file.filename }}</h4></div>
+                        <div class="panel-body">
+                            <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
+                            {% for frame in file.frames %}
+                                {{ frame.name }}
+                                {% for line in frame.lines %}
+                                    {% for k in line.data.keys() %}
+                                        {{ k }}
+                                    {% endfor %}
+                                {% endfor %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 {% endblock %}
