@@ -66,6 +66,13 @@
         });
     </script>
 
+    <script type="text/javascript">
+        /* Initialisation of toolboxes */
+        $(function () {
+          $('[data-toggle="tooltip"]').tooltip()
+        });
+    </script>
+
     <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
     <script type="text/javascript">
     $(function () {
@@ -148,7 +155,8 @@
                 <div class="col-md-5" id="data-col">
                     <div class="alert alert-info" role="alert">
                         Click on a frame name or a line number to get details or choose to show them all at once by
-                        clicking the following button
+                        clicking the following button.
+                        Hover on the data to get their type.
                     </div>
                     <p>
                         <div class="btn-group pull-right" role="group" aria-label="..." style="margin-bottom: 1em">
@@ -173,7 +181,6 @@
                                     <thead>
                                         <tr>
                                             <th>Object</th>
-                                            <th>Type</th>
                                             <th>Values</th>
                                             <th>Graph</th>
                                         </tr>
@@ -182,8 +189,13 @@
                                     {% for k,v in line.data.items()|sort %}
                                         <tr>
                                             <td>{{ k }}</td>
-                                            <td></td>
-                                            <td>{{ v }}</td>
+                                            <td>
+                                                {% for elem in v %}
+                                                    <span style="cursor: pointer;" data-toggle="tooltip" data-placement="bottom" title="{{ get_type(elem) }}">
+                                                        {{ elem }}
+                                                    </span>
+                                                {% endfor %}
+                                            </td>
                                             <td><span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></td>
                                         </tr>
                                     {%endfor%}

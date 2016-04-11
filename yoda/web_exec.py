@@ -67,6 +67,13 @@ def _colorize(files_object):
 
 # End of own functions
 
+@app.context_processor
+def type_processor():
+    def get_type(var):
+        print(type(var))
+        return type(var)
+    return dict(get_type=get_type)
+
 # Flask pages
 @app.route("/")
 def index():
