@@ -189,14 +189,12 @@
                                     {% for k,v in line.data.items()|sort %}
                                         <tr>
                                             <td>{{ k }}</td>
+                                            <td>{% for elem in v %}{{ elem }}{% endfor %}</td>
                                             <td>
-                                                {% for elem in v %}
-                                                    <span style="cursor: pointer;" data-toggle="tooltip" data-placement="bottom" title="{{ get_type(elem) }}">
-                                                        {{ elem }}
-                                                    </span>
-                                                {% endfor %}
+                                                <span class="inlinesparkline">
+                                                    {% for elem in v %}{{ elem }}{% endfor %}
+                                                </span>
                                             </td>
-                                            <td><span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></td>
                                         </tr>
                                     {%endfor%}
                                     </tbody>

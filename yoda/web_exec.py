@@ -67,13 +67,6 @@ def _colorize(files_object):
 
 # End of own functions
 
-@app.context_processor
-def type_processor():
-    def get_type(var):
-        print(type(var))
-        return type(var)
-    return dict(get_type=get_type)
-
 # Flask pages
 @app.route("/")
 def index():
@@ -98,7 +91,7 @@ def view_file(file_id):
         serie = defaultdict(list)
         for frame in file.frames:
             for line in frame.lines:
-                for k,listv in line.data.items():
+                for k, listv in line.data.items():
                     for v in listv:
                         if type(v) is (int or float):
                             serie[k].append(v)
