@@ -70,54 +70,59 @@
     <script type="text/javascript">
     $(function () {
         {% for k in series.keys() %}
-        $('#container{{ k }}').highcharts({
-            credits: {
-                enabled: false
-            },
-            title: {
-                text: '',
-                x: -20 //center
-            },
-            subtitle: {
-                text: '',
-                x: -20
-            },
-            xAxis: {
-                plotLines: [{
-                value: 0,
-                width: 1,
-                color: '#808080'
-                }],
-                allowDecimals: false
-            },
-            yAxis: {
-                title: {
-                    text: ''
+            {% if k %}
+            $('#container{{ k }}').highcharts({
+                chart: {
+                    height: 300
                 },
-                plotLines: [{
+                credits: {
+                    enabled: false
+                },
+                title: {
+                    text: '',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: '',
+                    x: -20
+                },
+                xAxis: {
+                    plotLines: [{
                     value: 0,
                     width: 1,
                     color: '#808080'
-                }],
-            },
-            tooltip: {
-                valueSuffix: ''
-            },
-            legend: {
-                layout: 'vertical',
-                align: 'right',
-                verticalAlign: 'middle',
-                borderWidth: 0
-            },
-            series: [
-                {% for var in series[k]|sort %}
-                {
-                    name: '{{ var }}',
-                    data: {{ series[k][var] }}
+                    }],
+                    allowDecimals: false
                 },
-                {% endfor %}
-            ]
-        });
+                yAxis: {
+                    title: {
+                        text: ''
+                    },
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }],
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                series: [
+                    {% for var in series[k]|sort %}
+                    {
+                        name: '{{ var }}',
+                        data: {{ series[k][var] }}
+                    },
+                    {% endfor %}
+                ]
+            });
+            {% endif %}
         {% endfor %}
     });
     </script>
@@ -131,7 +136,7 @@
             <div class="row">
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
-                <div id="container{{file.id}}" style="min-width: 310px; height: 300px; max-width: 1000px; margin: 50px auto"></div>
+                <div id="container{{file.id}}" style="min-width: 310px; max-width: 1000px; margin: 50px auto"></div>
             </div>
             <div class="row">
                 <!-- File source -->
@@ -168,6 +173,7 @@
                                     <thead>
                                         <tr>
                                             <th>Object</th>
+                                            <th>Type</th>
                                             <th>Values</th>
                                             <th>Graph</th>
                                         </tr>
@@ -176,7 +182,8 @@
                                     {% for k,v in line.data.items()|sort %}
                                         <tr>
                                             <td>{{ k }}</td>
-                                            <td>{{ v|replace("[", "")|replace("]", "") }}</td>
+                                            <td></td>
+                                            <td>{{ v }}</td>
                                             <td><span class="inlinesparkline">{{ v|replace("[", "")|replace("]", "") }}</span></td>
                                         </tr>
                                     {%endfor%}
