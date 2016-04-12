@@ -77,7 +77,7 @@
     <script type="text/javascript">
     $(function () {
         {% for k in series.keys() %}
-            {% if k %}
+            {% if k and series[k] %}
             $('#container{{ k }}').highcharts({
                 chart: {
                     height: 300
@@ -127,7 +127,18 @@
                         data: {{ series[k][var] }}
                     },
                     {% endfor %}
-                ]
+                ],
+                lang: {
+                    noData: "Nichts zu anzeigen"
+                },
+                noData: {
+                    style: {
+                        fontWeight: 'bold',
+                        fontSize: '15px',
+                        color: '#303030'
+                    }
+                }
+
             });
             {% endif %}
         {% endfor %}
