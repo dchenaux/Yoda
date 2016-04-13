@@ -66,7 +66,10 @@ class Yoda(bdb.Bdb):
                 continue
             if not isinstance(value, self.instrumented_types):
                 continue
-            new_locals[name] = [copy.deepcopy(value)]
+            if type(value) == str:
+                new_locals[name] = [copy.deepcopy(value)]
+            else:
+                new_locals[name] = copy.deepcopy(value)
 
             print(new_locals)
 
