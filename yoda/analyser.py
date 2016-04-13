@@ -43,7 +43,7 @@ from yoda.docdef import *
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
-    instrumented_types = (int, float, str, list)
+    instrumented_types = (int, float, str, list, dict)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
     prev_lineno = defaultdict(int)
     prev_lineno['<module>'] = 0
