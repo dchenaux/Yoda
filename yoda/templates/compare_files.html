@@ -6,28 +6,73 @@
     <link rel="stylesheet" href="{{url_for('static', filename='pygments/code.css')}}">
 {% endblock %}
 
+{% block scripts %}
+    {{ super() }}
+    <script type=text/javascript>
+        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+    </script>
+    <script type="text/javascript">
+         $(document).ready(function() {
+             {% for file in files %}
+                $('#{{ file.id }}').click();
+             {% endfor %}
+         });
+    </script>
+{% endblock scripts %}
+
 {% block content %}
-    <div class="container">
-        <div class="row">
-            <h3>File comparaison</h3>
-            {% for file in files %}
-                <div class="col-md-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading"><h4>{{ file.filename }}</h4></div>
-                        <div class="panel-body">
-                            <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
-                            {% for frame in file.frames %}
-                                {{ frame.name }}
-                                {% for line in frame.lines %}
-                                    {% for k in line.data.keys() %}
-                                        {{ k }}
-                                    {% endfor %}
-                                {% endfor %}
-                            {% endfor %}
-                        </div>
+    <div class="container-fluid">
+        <div class="page-header"><h2>File comparaison</h2></div>
+            <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-4">
+                    <h3>Files</h3>
+                    <div class="list-group">
+                    {% for file in files %}
+                        <a href="#" class="list-group-item" id="{{ file.id }}">
+                            <span class="glyphicon glyphicon-search pull-right" aria-hidden="true"></span>
+                            <h5 class="list-group-item-heading">{{ file.filename }}</h5>
+                            <p class="list-group-item-text">{{ file.revision  }}{{ file.timestamp  }}</p>
+                        </a>
+                    {% endfor %}
                     </div>
                 </div>
-            {% endfor %}
+                <div class="col-md-4">
+                <h3>Frames</h3>
+                    {% for file in files %}
+                        <div class="panel panel-default collapse">
+                            <div class="panel-body">
+                                {% for frame in file.frames %}
+                                    <p>{{ frame.name }}</p>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="col-md-4">
+                    <h3>Objects</h3>
+                        {% for file in files %}
+                            <div class="panel panel-default collapse">
+                                <div class="panel-body">
+                                    {% for frame in file.frames %}
+                                        <p>{{ frame.name }}</p>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+           <h3>Selected objects for comparaison</h3>
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    Basic panel example
+                </div>
+            </div>
+            <a href="#">Generate graph</a>
+            <a href="#">Show objects details</a>
+            <a href="#">Unselect all</a>
         </div>
     </div>
 {% endblock %}

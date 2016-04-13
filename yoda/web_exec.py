@@ -12,7 +12,7 @@ import re
 
 from mongoengine import *
 
-from flask import Flask, render_template, redirect, url_for, flash
+from flask import Flask, render_template, redirect, url_for, flash, jsonify
 from flask.ext.mongoengine import MongoEngine
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -51,7 +51,7 @@ db = MongoEngine(app)
 
 # End of Flask configuration
 
-# Own functions
+# Internal functions
 
 
 def _colorize(files_object):
@@ -64,8 +64,17 @@ def _colorize(files_object):
 
     return files_object
 
+# End of internal functions
 
-# End of own functions
+# Public functions that are not pages
+
+
+@app.route('/file_details/<file_id>')
+def file_details(file_id):
+    return jsonify(File.objects(id=file_id))
+
+
+# End of section
 
 # Flask pages
 @app.route("/")
