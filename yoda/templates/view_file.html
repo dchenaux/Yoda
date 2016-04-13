@@ -200,10 +200,10 @@
                                     {% for k,v in line.data.items()|sort %}
                                         <tr>
                                             <td>{{ k }}</td>
-                                            <td>{% for elem in v %}{{ elem }}{% endfor %}</td>
+                                            <td>{{ v }}</td>
                                             <td>
                                                 <span class="inlinesparkline">
-                                                    {% for elem in v %}{{ elem }}{% endfor %}
+                                                    {{ v|replace("[", "")|replace("]", "") }}
                                                 </span>
                                             </td>
                                         </tr>
