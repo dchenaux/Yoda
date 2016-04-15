@@ -8,14 +8,43 @@
 
 {% block scripts %}
     {{ super() }}
-    <script type=text/javascript>
-        $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
-    </script>
     <script type="text/javascript">
          $(document).ready(function() {
              {% for file in files %}
-                $('#{{ file.id }}').click();
+                 $('#{{ file.id }}').click(function(){
+                     $('.list-frame').remove();
+                     $('.list-line').remove();
+
+                     $.getJSON($SCRIPT_ROOT + '/_file_details/{{ file.id }}',function( data ) {
+                         $DATA = data
+                         var frames = data[0].frames
+                         $(frames).each(function() {
+                             var name = this.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                             $('#list-frames').append(
+                                   '<a href="#" class="list-group-item list-frame"><p class="list-group-item-text">'+name+'</p></a>');
+                         });
+                     });
+                 });
              {% endfor %}
+
+             $('#list-frames').on('click', 'a', function(){
+                  $('.list-lines').remove();
+                 var frame_name = $(this).context.innerText;
+                 var frames = $DATA[0].frames;
+
+                 $(frames).each(function(){
+                     var frame = this;
+                     if(frame.name == frame_name){
+                         $(frame.objects).each(function() {
+                             var line = this;
+                             console.log(this)
+                             $('#list-lines').append(
+                            '<a href="#" class="list-group-item list-line"><p class="list-group-item-text">'+this.lineno+'</p></a>');
+                         });
+                     }
+                 })
+             });
+
          });
     </script>
 {% endblock scripts %}
@@ -37,30 +66,18 @@
                     {% endfor %}
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                 <h3>Frames</h3>
-                    {% for file in files %}
-                        <div class="panel panel-default collapse">
-                            <div class="panel-body">
-                                {% for frame in file.frames %}
-                                    <p>{{ frame.name }}</p>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    {% endfor %}
+                    <div class="list-group" id="list-frames"></div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-1">
+                    <h3>Lines</h3>
+                    <div class="list-group" id="list-lines"></div>
+                </div>
+                <div class="col-md-3">
                     <h3>Objects</h3>
-                        {% for file in files %}
-                            <div class="panel panel-default collapse">
-                                <div class="panel-body">
-                                    {% for frame in file.frames %}
-                                        <p>{{ frame.name }}</p>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        {% endfor %}
-                    </div>
+                    <div class="list-group" id="list-lines"></div>
+                </div>
             </div>
         </div>
         <div class="col-md-4">

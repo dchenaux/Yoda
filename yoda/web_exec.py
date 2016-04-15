@@ -9,6 +9,7 @@ See Flask documentation for detailed informations about how to deploy an app.
 
 from collections import defaultdict
 import re
+import json
 
 from mongoengine import *
 
@@ -64,17 +65,29 @@ def _colorize(files_object):
 
     return files_object
 
+
+def _serialize(file_objects):
+    file_objects = json.loads(file_objects)
+    for file in file_objects:
+        for frame in file['frames']:
+            serie = defaultdict(list)
+            for line in frame['lines']:
+                for k,v in line['data'].items():
+                    serie[k].append(v)
+            frame['objects'] = serie
+            del frame['lines']
+
+    return file_objects
+
+
+
+@app.route('/_file_details/<file_id>')
+def _file_details(file_id):
+    file_objects = _serialize(File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
+    return json.dumps(file_objects)
+
+
 # End of internal functions
-
-# Public functions that are not pages
-
-
-@app.route('/file_details/<file_id>')
-def file_details(file_id):
-    return jsonify(File.objects(id=file_id))
-
-
-# End of section
 
 # Flask pages
 @app.route("/")
@@ -127,9 +140,9 @@ def remove_files(files_id):
 @app.route("/compare_files/<files_id>")
 def compare_files(files_id):
     files_id = re.split('&', files_id)
-    files_object = File.objects(id__in=files_id)
+    files_object = File.objects(id__in=files_id).exclude("frames", "content")
 
-    return render_template('compare_files.html', files=_colorize(files_object))
+    return render_template('compare_files.html', files=files_object)
 
 
 
