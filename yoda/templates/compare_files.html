@@ -9,44 +9,67 @@
 {% block scripts %}
     {{ super() }}
     <script type="text/javascript">
-         $(document).ready(function() {
-             {% for file in files %}
-                 $('#{{ file.id }}').click(function(){
-                     $('.list-frame').remove();
-                     $('.list-line').remove();
+        $(document).ready(function() {
+            var $SELECTED_OBJECTS = new Array();
 
-                     $.getJSON($SCRIPT_ROOT + '/_file_details/{{ file.id }}',function( data ) {
-                         $DATA = data
-                         var frames = data[0].frames
-                         $(frames).each(function() {
-                             var name = this.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                             $('#list-frames').append(
-                                   '<a href="#" class="list-group-item list-frame"><p class="list-group-item-text">'+name+'</p></a>');
-                         });
-                     });
-                 });
-             {% endfor %}
+            /* When files are clicked show corresponding frames */
+            {% for file in files %}
+                $('#{{ file.id }}').click(function(){
+                    $('.list-frame').remove();
+                    $('.list-object').remove();
 
-             $('#list-frames').on('click', 'a', function(){
-                  $('.list-lines').remove();
-                 var frame_name = $(this).context.innerText;
-                 var frames = $DATA[0].frames;
+                    $.getJSON($SCRIPT_ROOT + '/_file_details/{{ file.id }}',function( data ) {
+                        $DATA = data;
+                        var frames = data[0].frames;
+                        $(frames).each(function() {
+                            var name = this.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                            $('#list-frames').append(
+                                    '<a href="#" class="list-group-item list-frame" id="name"><p class="list-group-item-text">'+name+'</p></a>');
+                        });
+                    });
+                });
+            {% endfor %}
 
-                 $(frames).each(function(){
-                     var frame = this;
-                     if(frame.name == frame_name){
-                         $(frame.objects).each(function() {
-                             var line = this;
-                             console.log(this)
-                             $('#list-lines').append(
-                            '<a href="#" class="list-group-item list-line"><p class="list-group-item-text">'+this.lineno+'</p></a>');
-                         });
-                     }
-                 })
-             });
+            /* When frames are clicked show corresponding objects */
+            $('#list-frames').on('click', 'a', function(){
+                $('.list-object').remove();
+                var frame_name = $(this).context.innerText;
+                var frames = $DATA[0].frames;
 
-         });
+                $(frames).each(function(){
+                    var frame = this;
+                    if(frame.name == frame_name){
+                        $.each(frame.objects, function(k,v) {
+                            var id = $DATA[0]._id.$oid+'-'+frame.name+'-'+k;
+                            if($.inArray(id, $SELECTED_OBJECTS) == -1) {
+                                $('#list-objects').append(
+                                    '<a href="#" class="list-group-item list-object" id="'+id+'"><p class="list-group-item-text">'+k+'</p></a>');
+                            }
+                        });
+                    }
+                })
+            });
+
+            /* When objects are clicked add them in the selected list */
+            $('#list-objects').on('click', 'a', function(){
+                $(this).remove()
+                var id = $(this).context.id;
+                var [file,frame,object] = id.split("-");
+                $SELECTED_OBJECTS.push(id)
+                $('#list-selected-objects').append(
+                        '<a href="#" class="list-group-item list-selected-object" id="selected-'+id+'"><p class="list-group-item-text">'+object+'</p></a>');
+            });
+
+            /* Unselect all objects */
+            $('#bt-unselectall').click( function(){
+                $('.list-selected-object').remove();
+                $SELECTED_OBJECTS = []
+            });
+
+        });
+
     </script>
+
 {% endblock scripts %}
 
 {% block content %}
@@ -70,26 +93,20 @@
                 <h3>Frames</h3>
                     <div class="list-group" id="list-frames"></div>
                 </div>
-                <div class="col-md-1">
-                    <h3>Lines</h3>
-                    <div class="list-group" id="list-lines"></div>
-                </div>
                 <div class="col-md-3">
                     <h3>Objects</h3>
-                    <div class="list-group" id="list-lines"></div>
+                    <div class="list-group" id="list-objects"></div>
                 </div>
             </div>
         </div>
         <div class="col-md-4">
            <h3>Selected objects for comparaison</h3>
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    Basic panel example
-                </div>
+            <div class="list-group" id="list-selected-objects"></div>
+            <div class="btn-group" role="group" style="margin-bottom: 1em">
+                <button type="button" class="btn btn-default" id="bt-gengraph">Generate graph</button>
+                <button type="button" class="btn btn-default" id="bt-context">Show objects context</button>
+                <button type="button" class="btn btn-default" id="bt-unselectall">Unselect all</button>
             </div>
-            <a href="#">Generate graph</a>
-            <a href="#">Show objects details</a>
-            <a href="#">Unselect all</a>
         </div>
     </div>
 {% endblock %}
