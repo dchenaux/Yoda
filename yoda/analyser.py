@@ -39,11 +39,13 @@ from mongoengine import *
 import yoda.settings as settings
 from yoda.docdef import *
 
+# TODO : Check Compatibility for python2.7
 
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
     instrumented_types = (int, float, str, list, dict)
+    simple_types = (int, float, str)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
     prev_lineno = defaultdict(int)
     prev_lineno['<module>'] = 0
@@ -66,12 +68,10 @@ class Yoda(bdb.Bdb):
                 continue
             if not isinstance(value, self.instrumented_types):
                 continue
-            if type(value) == str:
+            if isinstance(value, self.simple_types):
                 new_locals[name] = [copy.deepcopy(value)]
             else:
                 new_locals[name] = copy.deepcopy(value)
-
-            print(new_locals)
 
         return new_locals
 
@@ -82,16 +82,12 @@ class Yoda(bdb.Bdb):
         return subprocess.check_output(['git', 'config', 'user.name'])
 
     def user_call(self, frame, args):
-        print("CALL EVENT")
         self.cur_framename = str(frame.f_code.co_name)
         self.prev_lineno[self.cur_framename] = frame.f_lineno
 
         self.set_step() # continue
 
     def user_line(self, frame):
-        print("---------------------------------------------------------------------------------------------------------------------------------------------------------")
-        print("LINE EVENT")
-        print("Premier", self.json_results)
         cur_lineno = frame.f_lineno
         lineno = self.prev_lineno[self.cur_framename]
 
@@ -100,31 +96,24 @@ class Yoda(bdb.Bdb):
 
         if locals:
             if not self.json_results[filename][self.cur_framename].get(lineno):
-                #print(locals)
-                #print(lineno)
                 self.json_results[filename][self.cur_framename][lineno] = locals
-                print("Deuxième",self.json_results)
-                print("stored")
             else:
-                print("pasla")
                 for k,v in locals.items():
                     if not self.json_results[filename][self.cur_framename][lineno].get(k):
                         self.json_results[filename][self.cur_framename][lineno][k] = v
                     else:
                         self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
 
+
         self.prev_lineno[self.cur_framename] = cur_lineno
 
         self.set_step()
-        print("Troisième",self.json_results)
 
     def user_return(self, frame, value):
-        print("RETURN EVENT")
         self.cur_framename = '<module>'
         self.set_step()  # continue
 
     def user_exception(self, frame, exception):
-        print("EXCEPTION EVENT")
         name = frame.f_code.co_name or "<unknown>"
         print("exception in", name, exception)
         self.set_continue()  # continue
@@ -136,8 +125,6 @@ class Yoda(bdb.Bdb):
         sys.settrace(None)
 
         if self.json_results:
-            print(self.json_results)
-
             if settings.DEBUG:
                 print(self.json_results)
             else:
