@@ -68,10 +68,8 @@ class Yoda(bdb.Bdb):
                 continue
             if not isinstance(value, self.instrumented_types):
                 continue
-            if isinstance(value, self.simple_types):
-                new_locals[name] = [copy.deepcopy(value)]
-            else:
-                new_locals[name] = copy.deepcopy(value)
+
+            new_locals[name] = [copy.deepcopy(value)]
 
         return new_locals
 
@@ -110,7 +108,6 @@ class Yoda(bdb.Bdb):
                         self.json_results[filename][self.cur_framename][lineno][k] = v
                     else:
                         self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
-
 
         self.prev_lineno[self.cur_framename] = cur_lineno
 
