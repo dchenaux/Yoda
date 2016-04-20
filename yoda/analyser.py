@@ -76,10 +76,17 @@ class Yoda(bdb.Bdb):
         return new_locals
 
     def _get_git_revision_short_hash(self):
-        return subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+        try:
+            revision = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
+        except:
+            revision = None
+        return revision
 
     def _get_git_username(self):
-        return subprocess.check_output(['git', 'config', 'user.name'])
+        try:
+            username = subprocess.check_output(['git', 'config', 'user.name'])
+        except:
+            username = None
 
     def user_call(self, frame, args):
         self.cur_framename = str(frame.f_code.co_name)
