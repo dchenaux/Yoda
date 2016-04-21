@@ -34,7 +34,7 @@ import sys
 import timeit
 import copy
 
-from mongoengine import *
+import mongoengine
 
 import yoda.settings as settings
 from yoda.docdef import *
@@ -46,13 +46,14 @@ class Yoda(bdb.Bdb):
     simple_types = (int, float, str)
     #instrumented_types = (dict, bytes, bool, float, int, list, object, str, tuple)
     prev_lineno = defaultdict(int)
-    prev_lineno['<module>'] = 0
-    cur_framename = '<module>'
+    prev_lineno['<module>'] = 0 # Fix to 0 because there is no previous line number
+    cur_framename = '<module>' # Fixed to this value because it's always the main frame name
+    file_id = None # File id of the saved object
 
     def __init__(self):
         bdb.Bdb.__init__(self)
-        if not settings.DEBUG: # If DEBUG is to FALSE connect to mongodb
-            connect(settings.MONGODB)
+        if settings.DEBUG is False:
+            mongoengine.connect(settings.MONGODB)
         self._clear_cache()
 
     def _clear_cache(self):
@@ -71,17 +72,68 @@ class Yoda(bdb.Bdb):
         return new_locals
 
     def _get_git_revision_short_hash(self):
+        """
+        Get the git revision number
+        :return: the last revision number or None if the file is not in a git repo
+        """
+
         try:
             revision = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'])
         except:
             revision = None
+
         return revision
 
     def _get_git_username(self):
+        """
+        Get the git username
+        :return: git username or None if not configured
+        """
+
         try:
             username = subprocess.check_output(['git', 'config', 'user.name'])
         except:
             username = None
+
+        return username
+
+    def _create_new_file(self):
+        for module_file, frames in self.json_results.items():
+            if 'analyser.py' not in module_file:
+                file = open(module_file, 'r')
+                file_content = file.read()
+                file.close()
+
+                if file_content:
+                    item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
+                    for name, lines in sorted(frames.items()):
+                        frame = Frame(name=name)
+                        for lineno, data in sorted(lines.items()):
+                            line = Line(lineno = lineno, data = data)
+                            frame.lines.append(line)
+
+                        item.frames.append(frame)
+
+                    item.save()
+                    self.file_id = item.id
+
+    def _update_file(self):
+        for module_file, frames in self.json_results.items():
+            if 'analyser.py' not in module_file:
+                for name, lines in sorted(frames.items()):
+                    for lineno, data in sorted(lines.items()):
+                        line = Line(lineno = lineno, data = data)
+                        item = File.objects.find(id=self.file_id, frames__name=name).update(push__frames__lines=line)
+
+
+
+    def _populate_db(self):
+        if self.file_id is None:
+            self._create_new_file()
+            self._clear_cache()
+        else:
+            self._update_file()
+            self._clear_cache()
 
     def user_call(self, frame, args):
         self.cur_framename = str(frame.f_code.co_name)
@@ -129,24 +181,8 @@ class Yoda(bdb.Bdb):
             if settings.DEBUG:
                 print(self.json_results)
             else:
-                for module_file, frames in self.json_results.items():
-                    if 'analyser.py' not in module_file:
-                        file = open(module_file, 'r')
-                        file_content = file.read()
-                        file.close()
-
-                        if file_content:
-                            item = File(user=self._get_git_username(), revision=self._get_git_revision_short_hash(), filename=module_file, timestamp=datetime.now(), content=file_content)
-                            for name, lines in sorted(frames.items()):
-                                frame = Frame(name=name)
-                                for lineno, data in sorted(lines.items()):
-                                    line = Line(lineno = lineno, data = data)
-                                    frame.lines.append(line)
-
-                                item.frames.append(frame)
-
-                            item.save()
-                self._clear_cache()
+                self._create_new_file()
+                self._update_file()
         print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
 
 
