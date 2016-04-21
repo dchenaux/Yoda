@@ -39,8 +39,6 @@ from mongoengine import *
 import yoda.settings as settings
 from yoda.docdef import *
 
-# TODO : Check Compatibility for python2.7
-
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
@@ -61,7 +59,6 @@ class Yoda(bdb.Bdb):
         self.json_results = defaultdict(lambda: defaultdict(defaultdict))
 
     def _filter_locals(self, local_vars):
-        print("FILTER LOCALS")
         new_locals = {}
         for name, value in list(local_vars.items()):
             if name.startswith('__'):
