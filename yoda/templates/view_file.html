@@ -76,6 +76,8 @@
     <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
     <script type="text/javascript">
     $(function () {
+    /* TODO: The graph is completly wrong with loops */
+
         {% for k in series.keys() %}
             {% if k and series[k] %}
             $('#container{{ k }}').highcharts({

@@ -49,6 +49,8 @@ class Yoda(bdb.Bdb):
     prev_lineno['<module>'] = 0 # Fix to 0 because there is no previous line number
     cur_framename = '<module>' # Fixed to this value because it's always the main frame name
     file_id = None # File id of the saved object
+    total_linenb = 0
+    next_backup = 1000
 
     def __init__(self):
         bdb.Bdb.__init__(self)
@@ -123,7 +125,7 @@ class Yoda(bdb.Bdb):
                 for name, lines in sorted(frames.items()):
                     for lineno, data in sorted(lines.items()):
                         line = Line(lineno = lineno, data = data)
-                        item = File.objects.find(id=self.file_id, frames__name=name).update(push__frames__lines=line)
+                        item = File.objects(id=self.file_id, frames__name=name).update(push__frames__S__lines=line)
 
 
 
@@ -159,6 +161,10 @@ class Yoda(bdb.Bdb):
                         self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
 
         self.prev_lineno[self.cur_framename] = cur_lineno
+        self.total_linenb += 1
+        if self.total_linenb > self.next_backup:
+            self._populate_db()
+            self.next_backup += 1000
 
         self.set_step()
 
@@ -181,8 +187,7 @@ class Yoda(bdb.Bdb):
             if settings.DEBUG:
                 print(self.json_results)
             else:
-                self._create_new_file()
-                self._update_file()
+                self._populate_db()
         print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
 
 
