@@ -39,6 +39,9 @@ import mongoengine
 import yoda.settings as settings
 from yoda.docdef import *
 
+
+IS_PYTHON_3 = (sys.version_info[0] == 3)
+
 class Yoda(bdb.Bdb):
     run = 0
     json_results = None
@@ -68,6 +71,9 @@ class Yoda(bdb.Bdb):
                 continue
             if not isinstance(value, self.instrumented_types):
                 continue
+            if not IS_PYTHON_3:
+                if isinstance(value, str):
+                    value = unicode(value, 'utf-8')
 
             new_locals[name] = [copy.deepcopy(value)]
 
