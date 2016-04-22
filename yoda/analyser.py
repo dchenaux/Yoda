@@ -164,7 +164,7 @@ class Yoda(bdb.Bdb):
         self.total_linenb += 1
         if self.total_linenb > self.next_backup:
             self._populate_db()
-            self.next_backup += 1000
+            self.next_backup += self.next_backup
 
         self.set_step()
 
