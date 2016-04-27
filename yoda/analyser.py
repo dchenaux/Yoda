@@ -109,7 +109,7 @@ class Yoda(bdb.Bdb):
                 if IS_PYTHON_3:
                     file_content = file.read()
                 else:
-                    file_content = None
+                    file_content = "Sorry but Python 2.7 is a real mess with encodings"
                 file.close()
 
                 if file_content:
