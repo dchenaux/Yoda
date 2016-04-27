@@ -109,7 +109,7 @@ class Yoda(bdb.Bdb):
                 if IS_PYTHON_3:
                     file_content = file.read()
                 else:
-                    file_content = unicode(file.read())
+                    file_content = None
                 file.close()
 
                 if file_content:
