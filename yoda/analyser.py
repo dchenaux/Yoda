@@ -71,9 +71,6 @@ class Yoda(bdb.Bdb):
                 continue
             if not isinstance(value, self.instrumented_types):
                 continue
-            if not IS_PYTHON_3:
-                if isinstance(value, str):
-                    value = unicode(value, 'utf-8')
 
             new_locals[name] = [copy.deepcopy(value)]
 
@@ -109,7 +106,10 @@ class Yoda(bdb.Bdb):
         for module_file, frames in self.json_results.items():
             if 'analyser.py' not in module_file:
                 file = open(module_file, 'r')
-                file_content = file.read()
+                if IS_PYTHON_3:
+                    file_content = file.read()
+                else:
+                    file_content = unicode(file.read())
                 file.close()
 
                 if file_content:
