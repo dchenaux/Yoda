@@ -33,6 +33,8 @@ import subprocess
 import sys
 import timeit
 import copy
+from pprint import pprint
+import inspect
 
 import mongoengine
 
@@ -51,6 +53,7 @@ class Yoda(bdb.Bdb):
     prev_lineno = defaultdict(int)
     prev_lineno['<module>'] = 0 # Fix to 0 because there is no previous line number
     cur_framename = '<module>' # Fixed to this value because it's always the main frame name
+    file_name = None
     file_id = None # File id of the saved object
     total_linenb = 0
     next_backup = 1000
@@ -144,44 +147,59 @@ class Yoda(bdb.Bdb):
             self._clear_cache()
 
     def user_call(self, frame, args):
-        self.cur_framename = str(frame.f_code.co_name)
-        self.prev_lineno[self.cur_framename] = frame.f_lineno
-
-        self.set_step() # continue
+        self.interaction(frame, 'call', None)
 
     def user_line(self, frame):
-        cur_lineno = frame.f_lineno
-        lineno = self.prev_lineno[self.cur_framename]
-
-        locals = self._filter_locals(frame.f_locals)
-        filename = frame.f_globals['__file__']
-
-        if locals:
-            if not self.json_results[filename][self.cur_framename].get(lineno):
-                self.json_results[filename][self.cur_framename][lineno] = locals
-            else:
-                for k,v in locals.items():
-                    if not self.json_results[filename][self.cur_framename][lineno].get(k):
-                        self.json_results[filename][self.cur_framename][lineno][k] = v
-                    else:
-                        self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
-
-        self.prev_lineno[self.cur_framename] = cur_lineno
-        self.total_linenb += 1
-        if self.total_linenb > self.next_backup:
-            self._populate_db()
-            self.next_backup += self.next_backup
-
-        self.set_step()
+        self.interaction(frame, 'line', None)
 
     def user_return(self, frame, value):
-        self.cur_framename = '<module>'
-        self.set_step()  # continue
+        self.interaction(frame, 'return', None)
 
     def user_exception(self, frame, exception):
-        name = frame.f_code.co_name or "<unknown>"
-        print("exception in", name, exception)
-        self.set_continue()  # continue
+        self.interaction(frame, 'line', exception)
+
+    def interaction(self, frame, event, exception):
+        if event == 'call':
+            self.cur_framename = str(frame.f_code.co_name)
+            self.prev_lineno[self.cur_framename] = frame.f_lineno
+            self.set_step() # continue
+
+        if event == 'line':
+            cur_lineno = frame.f_lineno
+            lineno = self.prev_lineno[self.cur_framename]
+
+            locals = self._filter_locals(frame.f_locals)
+            filename = frame.f_globals['__file__']
+
+            print(inspect.getsourcelines(frame.f_code))
+
+            if locals:
+                if not self.json_results[filename][self.cur_framename].get(lineno):
+                    self.json_results[filename][self.cur_framename][lineno] = locals
+                else:
+                    for k,v in locals.items():
+                        if not self.json_results[filename][self.cur_framename][lineno].get(k):
+                            self.json_results[filename][self.cur_framename][lineno][k] = v
+                        else:
+                            self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
+
+            self.prev_lineno[self.cur_framename] = cur_lineno
+            self.total_linenb += 1
+            if self.total_linenb > self.next_backup:
+                self._populate_db()
+                self.next_backup += self.next_backup
+
+            self.set_step()
+
+        if event == 'return':
+            self.cur_framename = '<module>'
+            self.set_step()  # continue
+
+        if event == 'exception':
+            name = frame.f_code.co_name or "<unknown>"
+            print("exception in", name, exception)
+            self.set_continue()  # continue
+
 
     def set_quit(self):
         self.stopframe = self.botframe
