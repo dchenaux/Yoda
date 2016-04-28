@@ -56,7 +56,7 @@ class Yoda(bdb.Bdb):
     file_name = None
     file_id = None # File id of the saved object
     total_linenb = 0
-    next_backup = 1000
+    next_backup = 10
 
     def __init__(self):
         bdb.Bdb.__init__(self)
@@ -132,19 +132,22 @@ class Yoda(bdb.Bdb):
         for module_file, frames in self.json_results.items():
             if 'analyser.py' not in module_file:
                 for name, lines in sorted(frames.items()):
+                    if not File.objects(id=self.file_id, frames__name=name):
+                        frame = Frame(name=name)
+                        File.objects(id=self.file_id).update(push__frames=frame)
                     for lineno, data in sorted(lines.items()):
                         line = Line(lineno = lineno, data = data)
-                        item = File.objects(id=self.file_id, frames__name=name).update(push__frames__S__lines=line)
-
-
+                        File.objects(id=self.file_id, frames__name=name).update(push__frames__S__lines=line)
 
     def _populate_db(self):
         if self.file_id is None:
             self._create_new_file()
             self._clear_cache()
+            print("FILE CREATED")
         else:
             self._update_file()
             self._clear_cache()
+            print("FILE UPDATED")
 
     def user_call(self, frame, args):
         self.interaction(frame, 'call', None)
@@ -159,46 +162,50 @@ class Yoda(bdb.Bdb):
         self.interaction(frame, 'line', exception)
 
     def interaction(self, frame, event, exception):
-        if event == 'call':
-            self.cur_framename = str(frame.f_code.co_name)
-            self.prev_lineno[self.cur_framename] = frame.f_lineno
-            self.set_step() # continue
+        if self.file_name is None:
+            self.file_name = inspect.getfile(frame)
+            print(self.file_name)
 
-        if event == 'line':
-            cur_lineno = frame.f_lineno
-            lineno = self.prev_lineno[self.cur_framename]
+        if self.file_name is inspect.getfile(frame):
 
-            locals = self._filter_locals(frame.f_locals)
-            filename = frame.f_globals['__file__']
+            if event == 'call':
+                self.cur_framename = str(frame.f_code.co_name)
+                self.prev_lineno[self.cur_framename] = frame.f_lineno
+                self.set_step() # continue
 
-            print(inspect.getsourcelines(frame.f_code))
+            if event == 'line':
+                cur_lineno = frame.f_lineno
+                lineno = self.prev_lineno[self.cur_framename]
 
-            if locals:
-                if not self.json_results[filename][self.cur_framename].get(lineno):
-                    self.json_results[filename][self.cur_framename][lineno] = locals
-                else:
-                    for k,v in locals.items():
-                        if not self.json_results[filename][self.cur_framename][lineno].get(k):
-                            self.json_results[filename][self.cur_framename][lineno][k] = v
-                        else:
-                            self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
+                locals = self._filter_locals(frame.f_locals)
+                filename = frame.f_globals['__file__']
 
-            self.prev_lineno[self.cur_framename] = cur_lineno
-            self.total_linenb += 1
-            if self.total_linenb > self.next_backup:
-                self._populate_db()
-                self.next_backup += self.next_backup
+                if locals:
+                    if not self.json_results[filename][self.cur_framename].get(lineno):
+                        self.json_results[filename][self.cur_framename][lineno] = locals
+                    else:
+                        for k,v in locals.items():
+                            if not self.json_results[filename][self.cur_framename][lineno].get(k):
+                                self.json_results[filename][self.cur_framename][lineno][k] = v
+                            else:
+                                self.json_results[filename][self.cur_framename][lineno][k].append(v[0])
 
-            self.set_step()
+                self.prev_lineno[self.cur_framename] = cur_lineno
+                self.total_linenb += 1
+                if self.total_linenb > self.next_backup:
+                    self._populate_db()
+                    self.next_backup += self.next_backup
 
-        if event == 'return':
-            self.cur_framename = '<module>'
-            self.set_step()  # continue
+                self.set_step()
 
-        if event == 'exception':
-            name = frame.f_code.co_name or "<unknown>"
-            print("exception in", name, exception)
-            self.set_continue()  # continue
+            if event == 'return':
+                self.cur_framename = '<module>'
+                self.set_step()  # continue
+
+            if event == 'exception':
+                name = frame.f_code.co_name or "<unknown>"
+                print("exception in", name, exception)
+                self.set_continue()  # continue
 
 
     def set_quit(self):
