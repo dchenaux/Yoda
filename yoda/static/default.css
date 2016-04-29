@@ -22,6 +22,7 @@ pre .hll {
 .file-source {
     border: 1px solid #ccc;
     border-radius: 4px;
+    overflow: auto;
 }
 
 .highlighttable table .container:before {
@@ -29,13 +30,13 @@ pre .hll {
 }
 
 .highlighttable {
-    border-collapse: collapse
+    border-collapse: collapse;
 }
 
 .highlighttable td {
     height: 18px;
     padding: 8px 10px;
-    vertical-align: top
+    vertical-align: top;
 }
 
 .highlighttable td.annotations,
