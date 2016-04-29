@@ -56,7 +56,7 @@ class Yoda(bdb.Bdb):
     file_name = None
     file_id = None # File id of the saved object
     total_linenb = 0
-    next_backup = 10
+    next_backup = 1000
 
     def __init__(self):
         bdb.Bdb.__init__(self)
@@ -112,7 +112,13 @@ class Yoda(bdb.Bdb):
                 if IS_PYTHON_3:
                     file_content = file.read()
                 else:
-                    file_content = "Sorry but Python 2.7 is a real mess with encodings"
+                    # Only works if the source file has no special characters
+                    import commands
+                    file_encoding = commands.getoutput('file -b --mime-encoding %s' % module_file)
+                    file = open(module_file, 'r')
+                    file_content = file.read().decode(file_encoding).encode('utf-8')
+                    file.close()
+
                 file.close()
 
                 if file_content:
