@@ -50,6 +50,7 @@
 
     <script type="text/javascript">
         /* Script for sticking the source code div */
+        /*
         $(document).ready(function() {
             $(document).scroll(function () {
                 var scroll = $(this).scrollTop();
@@ -63,7 +64,7 @@
                     }
                 }
             });
-        });
+        });*/
     </script>
 
     <script type="text/javascript">
@@ -151,9 +152,9 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
+    <div class="container-fluid">
         {% for file in file %}
-            <div class="row">
+            <div class="container">
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
                 <div id="container{{file.id}}" style="min-width: 310px; max-width: 1000px; margin: 50px auto"></div>
@@ -166,21 +167,23 @@
                 <!-- End of file source -->
 
                 <div class="col-md-5" id="data-col">
-                    <div class="alert alert-info" role="alert">
-                        Click on a frame name or a line number to get details or choose to show them all at once by
-                        clicking the following button.
-                    </div>
-                    <p>
-                        <div class="btn-group pull-right" role="group" aria-label="..." style="margin-bottom: 1em">
-                            <button type="button" class="btn btn-default" id="bt-showall">Show all</button>
-                            <button type="button" class="btn btn-default" id="bt-closeall">Close all</button>
+                    <div class="row" style="margin: 5px;">
+                        <div class="alert alert-info" role="alert">
+                            Click on a frame name or a line number to get details or choose to show them all at once by
+                            clicking the following button.
                         </div>
-                        Analysed frames :
-                        {% for frame in file.frames %}
-                            <a href="#{{ frame.name|replace("<", "")|replace(">", "") }}">{{ frame.name }}</a>
-                        {% endfor %}
-                    </p>
-                    <p>&nbsp;</p>
+                        <p>
+                            <div class="btn-group pull-right" role="group" aria-label="..." style="margin-bottom: 1em">
+                                <button type="button" class="btn btn-default" id="bt-showall">Show all</button>
+                                <button type="button" class="btn btn-default" id="bt-closeall">Close all</button>
+                            </div>
+                            Analysed frames :
+                            {% for frame in file.frames %}
+                                <a href="#{{ frame.name|replace("<", "")|replace(">", "") }}">{{ frame.name }}</a>
+                            {% endfor %}
+                        </p>
+                    </div>
+                    <div class="row" id="data-col-row">
                     {% for frame in file.frames %}
                         {% for line in frame.lines %}
 
@@ -215,6 +218,7 @@
 
                         {% endfor %}
                     {% endfor %}
+                    </div>
                 </div>
             </div>
         {% endfor %}
