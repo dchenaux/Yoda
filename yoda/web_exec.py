@@ -14,7 +14,7 @@ import json
 from mongoengine import *
 
 from flask import Flask, render_template, redirect, url_for, flash, jsonify
-from flask.ext.mongoengine import MongoEngine
+from flask_mongoengine import MongoEngine
 from flask_debugtoolbar import DebugToolbarExtension
 
 from pygments import highlight
