@@ -13,12 +13,14 @@
             var $SELECTED_OBJECTS = new Array();
 
             /* When files are clicked show corresponding frames */
-            {% for file in files %}
-                $('#{{ file.id }}').click(function(){
+
+                $('*[id*="file-"]').click(function(){
                     $('.list-frame').remove();
                     $('.list-object').remove();
 
-                    $.getJSON($SCRIPT_ROOT + '/_file_details/{{ file.id }}',function( data ) {
+                    var id = this.id.replace("file-", "")
+
+                    $.getJSON($SCRIPT_ROOT + '/_file_details/'+id,function( data ) {
                         $DATA = data;
                         var frames = data[0].frames;
                         $(frames).each(function() {
@@ -28,7 +30,6 @@
                         });
                     });
                 });
-            {% endfor %}
 
             /* When frames are clicked show corresponding objects */
             $('#list-frames').on('click', 'a', function(){
@@ -57,14 +58,34 @@
                 var [file,frame,object] = id.split("-");
                 $SELECTED_OBJECTS.push(id)
                 $('#list-selected-objects').append(
-                        '<a href="#" class="list-group-item list-selected-object" id="selected-'+id+'"><p class="list-group-item-text">'+object+'</p></a>');
+                        '<a href="#" class="list-group-item list-selected-object" id="selected-'+id+'">' +
+                        '<p class="list-group-item-text">'+object+
+                        '<button class="close" id="unselect-'+id+'"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
+                        '<button class="close" id="context-'+id+'" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></p>' +
+                        '</a>');
             });
 
             /* Unselect all objects */
             $('#bt-unselectall').click( function(){
                 $('.list-selected-object').remove();
+                $('.list-frame').remove();
+                $('.list-object').remove();
                 $SELECTED_OBJECTS = []
             });
+
+            /* TODO : Unselect one object */
+
+
+            /* Show object context */
+            $('body').on('click', '*[id*="unselect-"]', function (){
+                $( this ).parent().closest('a').fadeOut()
+                /* TODO : Remove also from array ! */
+            });
+
+
+
+
+
 
         });
 
@@ -73,6 +94,22 @@
 {% endblock scripts %}
 
 {% block content %}
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Variable context</h4>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="container-fluid">
         <div class="page-header"><h2>File comparaison</h2></div>
             <div class="col-md-8">
@@ -81,7 +118,7 @@
                     <h3>Files</h3>
                     <div class="list-group">
                     {% for file in files %}
-                        <a href="#" class="list-group-item" id="{{ file.id }}">
+                        <a href="#" class="list-group-item" id="file-{{ file.id }}">
                             <span class="glyphicon glyphicon-search pull-right" aria-hidden="true"></span>
                             <h5 class="list-group-item-heading">{{ file.filename }}</h5>
                             <p class="list-group-item-text">{{ file.revision  }}{{ file.timestamp  }}</p>
@@ -104,7 +141,6 @@
             <div class="list-group" id="list-selected-objects"></div>
             <div class="btn-group" role="group" style="margin-bottom: 1em">
                 <button type="button" class="btn btn-default" id="bt-gengraph">Generate graph</button>
-                <button type="button" class="btn btn-default" id="bt-context">Show objects context</button>
                 <button type="button" class="btn btn-default" id="bt-unselectall">Unselect all</button>
             </div>
         </div>
