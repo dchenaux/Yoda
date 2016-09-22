@@ -1,3 +1,17 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+#  ██╗   ██╗ ██████╗ ██████╗  █████╗
+#  ╚██╗ ██╔╝██╔═══██╗██╔══██╗██╔══██╗
+#   ╚████╔╝ ██║   ██║██║  ██║███████║
+#    ╚██╔╝  ██║   ██║██║  ██║██╔══██║
+#     ██║   ╚██████╔╝██████╔╝██║  ██║
+#     ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
+
+"""
+This File defines the document formats to store in the mongodb
+"""
+
 from mongoengine import *
 
 

@@ -1,6 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+#  ██╗   ██╗ ██████╗ ██████╗  █████╗
+#  ╚██╗ ██╔╝██╔═══██╗██╔══██╗██╔══██╗
+#   ╚████╔╝ ██║   ██║██║  ██║███████║
+#    ╚██╔╝  ██║   ██║██║  ██║██╔══██║
+#     ██║   ╚██████╔╝██████╔╝██║  ██║
+#     ╚═╝    ╚═════╝ ╚═════╝ ╚═╝  ╚═╝
+
 """
 The analyser is the central point of the yoda project. It analyses the given script and store the results in a mongodb
 collection. Configuration of the mongodb is done in the settings.py file.
