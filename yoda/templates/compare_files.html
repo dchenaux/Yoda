@@ -13,23 +13,22 @@
             var $SELECTED_OBJECTS = new Array();
 
             /* When files are clicked show corresponding frames */
+            $('*[id*="file-"]').click(function(){
+                $('.list-frame').remove();
+                $('.list-object').remove();
 
-                $('*[id*="file-"]').click(function(){
-                    $('.list-frame').remove();
-                    $('.list-object').remove();
+                var id = this.id.replace("file-", "")
 
-                    var id = this.id.replace("file-", "")
-
-                    $.getJSON($SCRIPT_ROOT + '/_file_details/'+id,function( data ) {
-                        $DATA = data;
-                        var frames = data[0].frames;
-                        $(frames).each(function() {
-                            var name = this.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
-                            $('#list-frames').append(
-                                    '<a href="#" class="list-group-item list-frame" id="name"><p class="list-group-item-text">'+name+'</p></a>');
-                        });
+                $.getJSON($SCRIPT_ROOT + '/_file_details/'+id,function( data ) {
+                    $DATA = data;
+                    var frames = data[0].frames;
+                    $(frames).each(function() {
+                        var name = this.name.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+                        $('#list-frames').append(
+                                '<a href="#" class="list-group-item list-frame" id="name"><p class="list-group-item-text">'+name+'</p></a>');
                     });
                 });
+            });
 
             /* When frames are clicked show corresponding objects */
             $('#list-frames').on('click', 'a', function(){
@@ -53,7 +52,7 @@
 
             /* When objects are clicked add them in the selected list */
             $('#list-objects').on('click', 'a', function(){
-                $(this).remove()
+                $(this).hide()
                 var id = $(this).context.id;
                 var [file,frame,object] = id.split("-");
                 $SELECTED_OBJECTS.push(id)
@@ -73,17 +72,16 @@
                 $SELECTED_OBJECTS = []
             });
 
-            /* TODO : Unselect one object */
-
-
-            /* Show object context */
+            /* Unselect one object */
             $('body').on('click', '*[id*="unselect-"]', function (){
                 $( this ).parent().closest('a').fadeOut()
-                /* TODO : Remove also from array ! */
+                var id = $(this).attr('id').replace('unselect-','');
+                var index = $.inArray(id, $SELECTED_OBJECTS);
+                $SELECTED_OBJECTS.splice(index,1);
+                $('a[id="'+id+'"]').fadeIn('slow');
             });
 
-
-
+            /* TODO: Show object context */
 
 
 
