@@ -9,31 +9,36 @@
 {% block scripts %}
     {{super()}}
     <script type="text/javascript">
+
     /* Script for all the panel functions */
     $(document).ready(function(){
+
+        /* Show or hide all panels */
         $('#bt-showall').click(function(){
             $('[id^=panel-]').fadeIn('slow');
         })
         $('#bt-closeall').click(function(){
             $('[id^=panel-]').fadeOut('slow');
         })
-        {% for file in file %}
-            {% for frame in file.frames %}
 
-                {% for line in frame.lines %}
-                    $('a[href$="#{{ frame.name|replace("<", "")|replace(">", "") }}"]').click(function(){
-                        $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
-                    })
-                    $('a[href$="#-{{ line.lineno }}"]').click(function(){
-                        $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeIn( 'slow' );
-                        $("html, body").animate({ scrollTop: $(document).height() });
-                    })
-                    $('#close-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').click(function(){
-                        $('#panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}').fadeOut( 'slow' );
-                    })
-                {% endfor %}
-            {% endfor %}
-        {% endfor %}
+        /* Single panel functions */
+
+        // When click event on a line number occurs, open the corresponding panel
+        $('a[href*="#-"]').click(function(){
+            var panelno = $(this).attr('href').replace(/[^0-9\.]/g, '');
+            $('div[id^="panel-"][id$="-'+panelno+'"]').fadeIn( 'slow' );
+        });
+        // When clicking on a frame name, show all the corresponding panels
+        $('a[href^="#showframe-"]').click(function(){
+            var frame = $(this).attr('href').replace('#showframe-','');
+            $('div[id^="panel-'+frame+'-"]').fadeIn( 'slow' );
+        });
+        // When clicking on the close button, close the corresponding panel
+        $('button[id^="close-"]').click(function(){
+            id = $(this).attr('id').replace('close-','');
+            $('div[id="panel-'+id+'"]').fadeOut( 'slow' );
+        });
+
     });
     </script>
    <script type="text/javascript">
@@ -152,6 +157,7 @@
 {% endblock %}
 
 {% block content %}
+    <!-- TODO : avoid full page scroll -->
     <div class="container-fluid">
         {% for file in file %}
             <div class="container">
@@ -160,7 +166,7 @@
                 <div id="container{{file.id}}" style="min-width: 310px; max-width: 1000px; margin: 50px auto"></div>
             </div>
             <div class="row">
-                <!-- File source -->
+                <!-- File source, TODO: correct the layout-->
                 <div class="col-md-7" id="file-source-col">
                     {% include "partials/filesource.html" %}
                 </div>
@@ -179,14 +185,14 @@
                             </div>
                             Analysed frames :
                             {% for frame in file.frames %}
-                                <a href="#{{ frame.name|replace("<", "")|replace(">", "") }}">{{ frame.name }}</a>
+                                <a href="#showframe-{{ frame.name|replace("<", "")|replace(">", "") }}">{{ frame.name }}</a>
                             {% endfor %}
                         </p>
                     </div>
                     <div class="row" id="data-col-row">
                     {% for frame in file.frames %}
                         {% for line in frame.lines %}
-
+                            <!-- Panel for each line -->
                             <div class="panel panel-default collapse" id="panel-{{ frame.name|replace("<", "")|replace(">", "") }}-{{ line.lineno }}">
                                 <div class="panel-heading">
                                     {{ frame.name|replace("<", "")|replace(">", "") }} - {{ line.lineno }}
@@ -215,7 +221,7 @@
                                     </tbody>
                                 </table>
                             </div>
-
+                            <!-- end of panel -->
                         {% endfor %}
                     {% endfor %}
                     </div>
