@@ -89,6 +89,21 @@ def _serialize(file_objects):
 
     return file_objects
 
+def _file_fetch_data(file_id):
+    series = {}
+    file_object = File.objects(id=file_id)
+
+    for file in file_object:
+        serie = defaultdict(list)
+        for frame in file.frames:
+            for line in frame.lines:
+                for k, listv in line.data.items():
+                    for v in listv:
+                        if type(v) is (int or float):
+                            serie[k].append(v)
+        series[file.id] = serie
+
+    return file_object, series
 
 
 @app.route('/_file_details/<file_id>')
@@ -116,20 +131,27 @@ def view_file(file_id):
     :return: render the view_file.html template
     """
 
-    series = {}
-    file_object = File.objects(id=file_id)
-
-    for file in file_object:
-        serie = defaultdict(list)
-        for frame in file.frames:
-            for line in frame.lines:
-                for k, listv in line.data.items():
-                    for v in listv:
-                        if type(v) is (int or float):
-                            serie[k].append(v)
-        series[file.id] = serie
+    file_object, series = _file_fetch_data(file_id)
 
     return render_template('view_file.html', file=_colorize(file_object), series=series)
+
+@app.route("/view_context/<file_id>")
+def view_context(file_id):
+    """
+    view_file page which gives detailed information about a single run
+    :param file_id: passed in the url, unique identifier of a run
+    :return: render the view_file.html template
+    """
+
+    file_object, series = _file_fetch_data(file_id)
+    print(file_object)
+    colorized = _colorize(file_object)
+    for file in colorized:
+        colorized_file = file
+
+
+    return render_template('partials/filesource.html', file=colorized_file, series=series)
+
 
 @app.route("/remove_files/<files_id>")
 def remove_files(files_id):

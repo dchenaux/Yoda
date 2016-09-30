@@ -60,7 +60,7 @@
                         '<a href="#" class="list-group-item list-selected-object" id="selected-'+id+'">' +
                         '<p class="list-group-item-text">'+object+
                         '<button class="close" id="unselect-'+id+'"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
-                        '<button class="close" id="context-'+id+'" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></p>' +
+                        '<button href="/view_context/'+file+'" class="close" id="context-'+id+'" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></p>' +
                         '</a>');
             });
 
@@ -92,22 +92,16 @@
 {% endblock scripts %}
 
 {% block content %}
+
+    <!-- Context modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Variable context</h4>
-                </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                </div>
             </div>
         </div>
     </div>
+    <!-- end of modal -->
+
     <div class="container-fluid">
         <div class="page-header"><h2>File comparaison</h2></div>
             <div class="col-md-8">

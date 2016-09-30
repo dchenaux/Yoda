@@ -77,3 +77,7 @@ pre .hll {
     width: 100%;
     z-index: -1
 }
+
+.modal-dialog{
+  width:90%;
+}
