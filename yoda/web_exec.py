@@ -128,7 +128,7 @@ def view_file(file_id):
     """
     view_file page which gives detailed information about a single run
     :param file_id: passed in the url, unique identifier of a run
-    :return: render the view_file.html template
+    :return: render the view_context.html template
     """
 
     file_object, series = _file_fetch_data(file_id)
@@ -140,7 +140,7 @@ def view_context(file_id):
     """
     view_file page which gives detailed information about a single run
     :param file_id: passed in the url, unique identifier of a run
-    :return: render the view_file.html template
+    :return: render the view_context.html template
     """
 
     file_object, series = _file_fetch_data(file_id)
@@ -150,7 +150,7 @@ def view_context(file_id):
         colorized_file = file
 
 
-    return render_template('partials/filesource.html', file=colorized_file, series=series)
+    return render_template('partials/view_context.html', file=colorized_file, series=series)
 
 
 @app.route("/remove_files/<files_id>")
