@@ -60,9 +60,19 @@
                         '<a href="#" class="list-group-item list-selected-object" id="selected-'+id+'">' +
                         '<p class="list-group-item-text">'+object+
                         '<button class="close" id="unselect-'+id+'"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
-                        '<button href="/view_context/'+file+'" class="close" id="context-'+id+'" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></p>' +
+                        '<button class="close" id="context-'+id+'" data-toggle="modal" data-target="#ContextModal" data-fileid="'+file+'"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></p>' +
                         '</a>');
             });
+
+            // When the context button is punched open a modal with the filesource
+            $('#ContextModal').on('show.bs.modal', function (event) {
+              var button = $(event.relatedTarget) // Button that triggered the modal
+              var fileid = button.data('fileid') // Extract info from data-* attributes
+              // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
+              // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+              var modal = $(this)
+              modal.find('.modal-content').load('/view_context/'+fileid)
+            })
 
             /* Unselect all objects */
             $('#bt-unselectall').click( function(){
@@ -94,7 +104,7 @@
 {% block content %}
 
     <!-- Context modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal fade" id="ContextModal" tabindex="-1" role="dialog" aria-labelledby="Context">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
             </div>
