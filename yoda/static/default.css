@@ -21,6 +21,8 @@
 
 pre {
     line-height: 1.3;
+    border: 0;
+    background: transparent;
 }
 
 pre .hll {
