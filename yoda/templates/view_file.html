@@ -26,7 +26,7 @@
         // When click event on a line number occurs, open the corresponding panel
         $('a[href*="#-"]').click(function(){
             var panelno = $(this).attr('href').replace(/[^0-9\.]/g, '');
-            $('div[id^="panel-"][id$="-'+panelno+'"]').fadeIn( 'slow' );
+            $('div[id^="panel-"][id$="-'+panelno+'"]').fadeIn( 'fast' );
         });
         // When clicking on a frame name, show all the corresponding panels
         $('a[href^="#showframe-"]').click(function(){
@@ -61,77 +61,125 @@
     </script>
 
     <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts-data.js') }}"></script>
     <script type="text/javascript">
-    $(function () {
     /* TODO: The graph is completly wrong with loops */
+    // Why ? Because all the data begin a the left corner instead at the right point
+    /* TODO : Load data through AJAX in order to remove PHP in JS */
 
-        {% for k in series.keys() %}
-            {% if k and series[k] %}
-            $('#container{{ k }}').highcharts({
-                chart: {
-                    height: 300
-                },
-                credits: {
-                    enabled: false
-                },
-                title: {
-                    text: '',
-                    x: -20 //center
-                },
-                subtitle: {
-                    text: '',
-                    x: -20
-                },
-                xAxis: {
-                    plotLines: [{
-                    value: 0,
-                    width: 1,
-                    color: '#808080'
-                    }],
-                    allowDecimals: false
-                },
-                yAxis: {
+        $(function () {
+
+            var url = $(location).attr('href').split('/');
+            var id = url[url.length-1];
+
+            // Get the CSV and create the chart
+            $.getJSON($SCRIPT_ROOT + '/_file_details/'+id, function (csv) {
+                console.log(csv);
+
+                $('#container').highcharts({
+
+                    data: {
+                        csv: csv
+                    },
+
                     title: {
-                        text: ''
+                        text: 'Daily visits at www.highcharts.com'
                     },
-                    plotLines: [{
-                        value: 0,
-                        width: 1,
-                        color: '#808080'
-                    }],
-                },
-                tooltip: {
-                    valueSuffix: ''
-                },
-                legend: {
-                    layout: 'vertical',
-                    align: 'right',
-                    verticalAlign: 'middle',
-                    borderWidth: 0
-                },
-                series: [
-                    {% for var in series[k]|sort %}
-                    {
-                        name: '{{ var }}',
-                        data: {{ series[k][var] }}
-                    },
-                    {% endfor %}
-                ],
-                lang: {
-                    noData: "Nichts zu anzeigen"
-                },
-                noData: {
-                    style: {
-                        fontWeight: 'bold',
-                        fontSize: '15px',
-                        color: '#303030'
-                    }
-                }
 
+                    subtitle: {
+                        text: 'Source: Google Analytics'
+                    },
+
+                    xAxis: {
+                        tickInterval: 7 * 24 * 3600 * 1000, // one week
+                        tickWidth: 0,
+                        gridLineWidth: 1,
+                        labels: {
+                            align: 'left',
+                            x: 3,
+                            y: -3
+                        }
+                    },
+
+                    yAxis: [{ // left y axis
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            align: 'left',
+                            x: 3,
+                            y: 16,
+                            format: '{value:.,0f}'
+                        },
+                        showFirstLabel: false
+                    }, { // right y axis
+                        linkedTo: 0,
+                        gridLineWidth: 0,
+                        opposite: true,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            align: 'right',
+                            x: -3,
+                            y: 16,
+                            format: '{value:.,0f}'
+                        },
+                        showFirstLabel: false
+                    }],
+
+                    legend: {
+                        align: 'left',
+                        verticalAlign: 'top',
+                        y: 20,
+                        floating: true,
+                        borderWidth: 0
+                    },
+
+                    tooltip: {
+                        shared: true,
+                        crosshairs: true
+                    },
+
+                    plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (e) {
+                                        hs.htmlExpand(null, {
+                                            pageOrigin: {
+                                                x: e.pageX || e.clientX,
+                                                y: e.pageY || e.clientY
+                                            },
+                                            headingText: this.series.name,
+                                            maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
+                                                this.y + ' visits',
+                                            width: 200
+                                        });
+                                    }
+                                }
+                            },
+                            marker: {
+                                lineWidth: 1
+                            }
+                        }
+                    },
+
+                    series: [{
+                        name: 'All visits',
+                        lineWidth: 4,
+                        marker: {
+                            radius: 4
+                        }
+                    }, {
+                        name: 'New visitors'
+                    }]
+                });
             });
-            {% endif %}
-        {% endfor %}
-    });
+
+        });
+
     </script>
 
     <script type=text/javascript src="{{ url_for('static', filename='jquery.sparkline.min.js') }}"></script>

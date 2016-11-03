@@ -20,6 +20,7 @@ See Flask documentation for detailed informations about how to deploy an app.
 from collections import defaultdict
 import re
 import json
+import pprint
 
 from mongoengine import *
 
@@ -39,7 +40,7 @@ import yoda.settings as settings
 app = Flask(__name__)
 app.config['MONGODB_DB'] = settings.MONGODB
 app.config['SECRET_KEY'] = "b\xac\xea&\x9d\x86\x98Da?\xcaL\x146\x13\x83\x82.$\x91\xee\x03\xe3\x95"
-app.debug = True
+app.debug = False
 
 # Debug toolbar configuration
 app.config['DEBUG_TB_PANELS'] = [
@@ -71,13 +72,27 @@ def _colorize(files_object):
         for frame in file.frames:
             for line in frame.lines:
                 executed_lines.append(line.lineno)
-        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
+        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True, linespans="linecode"))
 
     return files_object
 
 
 def _serialize(file_objects):
     file_objects = json.loads(file_objects)
+    vars_list = set()
+    xAxis = set()
+    series = list()
+
+    for file in file_objects:
+        for frame in file['frames']:
+            for line in frame['lines']:
+                for k,v in line['data'].items():
+                    serie = {'name': '', 'data': list()}
+                    serie['name'] = k
+                    serie['data'].append(v)
+    return file_objects
+
+def _serialize2(file_objects):
     for file in file_objects:
         for frame in file['frames']:
             serie = defaultdict(list)
@@ -86,24 +101,18 @@ def _serialize(file_objects):
                     serie[k].append(v)
             frame['objects'] = serie
             del frame['lines']
-
     return file_objects
 
+
 def _file_fetch_data(file_id):
-    series = {}
+    """
+    Fetch file data
+    :param file_id:
+    :return file_object:
+    """
     file_object = File.objects(id=file_id)
 
-    for file in file_object:
-        serie = defaultdict(list)
-        for frame in file.frames:
-            for line in frame.lines:
-                for k, listv in line.data.items():
-                    for v in listv:
-                        if type(v) is (int or float):
-                            serie[k].append(v)
-        series[file.id] = serie
-
-    return file_object, series
+    return file_object
 
 
 @app.route('/_file_details/<file_id>')
@@ -131,9 +140,9 @@ def view_file(file_id):
     :return: render the view_context.html template
     """
 
-    file_object, series = _file_fetch_data(file_id)
+    file_object = _file_fetch_data(file_id)
 
-    return render_template('view_file.html', file=_colorize(file_object), series=series)
+    return render_template('view_file.html', file=_colorize(file_object))
 
 @app.route("/view_context/<file_id>")
 def view_context(file_id):
@@ -143,14 +152,18 @@ def view_context(file_id):
     :return: render the view_context.html template
     """
 
-    file_object, series = _file_fetch_data(file_id)
-    print(file_object)
+    file_object = _file_fetch_data(file_id)
     colorized = _colorize(file_object)
     for file in colorized:
         colorized_file = file
 
 
-    return render_template('partials/view_context.html', file=colorized_file, series=series)
+    return render_template('partials/view_context.html', file=colorized_file)
+
+@app.route("/generate_graph/<objects_id>")
+def generate_graph(objects_id):
+
+    return render_template('partials/generate_graph.html')
 
 
 @app.route("/remove_files/<files_id>")

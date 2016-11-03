@@ -62,16 +62,24 @@
                         '<button class="close" id="unselect-'+id+'"><span class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>' +
                         '<button class="close" id="context-'+id+'" data-toggle="modal" data-target="#ContextModal" data-fileid="'+file+'"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></button></p>' +
                         '</a>');
+                $('#bt-gengraph').prop('disabled', false);
             });
 
             // When the context button is punched open a modal with the filesource
             $('#ContextModal').on('show.bs.modal', function (event) {
               var button = $(event.relatedTarget) // Button that triggered the modal
               var fileid = button.data('fileid') // Extract info from data-* attributes
-              // If necessary, you could initiate an AJAX request here (and then do the updating in a callback).
-              // Update the modal's content. We'll use jQuery here, but you could use a data binding library or other methods instead.
+              // Update the modal's content.
               var modal = $(this)
               modal.find('.modal-content').load('/view_context/'+fileid)
+            })
+
+            $('#GraphModal').on('show.bs.modal', function (event) {
+              var button = $(event.relatedTarget) // Button that triggered the modal
+
+              // Update the modal's content.
+              var modal = $(this)
+              modal.find('.modal-content').load('/generate_graph/ahaha')
             })
 
             /* Unselect all objects */
@@ -80,6 +88,7 @@
                 $('.list-frame').remove();
                 $('.list-object').remove();
                 $SELECTED_OBJECTS = []
+                $('#bt-gengraph').prop('disabled', true);
             });
 
             /* Unselect one object */
@@ -89,9 +98,10 @@
                 var index = $.inArray(id, $SELECTED_OBJECTS);
                 $SELECTED_OBJECTS.splice(index,1);
                 $('a[id="'+id+'"]').fadeIn('slow');
+                if ($SELECTED_OBJECTS.length == 0) {
+                    $('#bt-gengraph').prop('disabled', true);
+                }
             });
-
-            /* TODO: Show object context */
 
 
 
@@ -105,6 +115,15 @@
 
     <!-- Context modal -->
     <div class="modal fade" id="ContextModal" tabindex="-1" role="dialog" aria-labelledby="Context">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+            </div>
+        </div>
+    </div>
+    <!-- end of modal -->
+
+    <!-- Graph modal -->
+    <div class="modal fade" id="GraphModal" tabindex="-1" role="dialog" aria-labelledby="Graph">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
             </div>
@@ -142,7 +161,7 @@
            <h3>Selected objects for comparaison</h3>
             <div class="list-group" id="list-selected-objects"></div>
             <div class="btn-group" role="group" style="margin-bottom: 1em">
-                <button type="button" class="btn btn-default" id="bt-gengraph">Generate graph</button>
+                <button type="button" class="btn btn-default" id="bt-gengraph" data-toggle="modal" data-target="#GraphModal" disabled>Generate graph</button>
                 <button type="button" class="btn btn-default" id="bt-unselectall">Unselect all</button>
             </div>
         </div>
