@@ -27,6 +27,7 @@
         $('a[href*="#-"]').click(function(){
             var panelno = $(this).attr('href').replace(/[^0-9\.]/g, '');
             $('div[id^="panel-"][id$="-'+panelno+'"]').fadeIn( 'fast' );
+            $("<span>Hello world!</span>").insertAfter('span[id="linecode-5"]');
         });
         // When clicking on a frame name, show all the corresponding panels
         $('a[href^="#showframe-"]').click(function(){
@@ -62,123 +63,86 @@
 
     <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
     <script type=text/javascript src="{{ url_for('static', filename='highcharts-data.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts-exporting.js') }}"></script>
+
     <script type="text/javascript">
     /* TODO: The graph is completly wrong with loops */
     // Why ? Because all the data begin a the left corner instead at the right point
     /* TODO : Load data through AJAX in order to remove PHP in JS */
 
-        $(function () {
+    $(function () {
 
-            var url = $(location).attr('href').split('/');
-            var id = url[url.length-1];
+        var id = $('div[id*="graph-"]').attr("id")
+        var file_id = id.split('-')
+        console.log(file_id[1])
 
-            // Get the CSV and create the chart
-            $.getJSON($SCRIPT_ROOT + '/_file_details/'+id, function (csv) {
-                console.log(csv);
+    // Get the CSV and create the chart
+    $.getJSON('/_graph_data/'+file_id[1], function (jsondata) {
 
-                $('#container').highcharts({
+        var data = $.parseJSON(jsondata);
+        console.log(data);
 
-                    data: {
-                        csv: csv
+        Highcharts.chart(id, {
+            chart: {
+                    height: 300
+                },
+                credits: {
+                    enabled: false
+                },
+                title: {
+                    text: 'Evolution of variables',
+                    x: -20 //center
+                },
+                subtitle: {
+                    text: '',
+                    x: -20
+                },
+                xAxis: {
+                     title: {
+                        text: 'Steps'
                     },
-
-                    title: {
-                        text: 'Daily visits at www.highcharts.com'
-                    },
-
-                    subtitle: {
-                        text: 'Source: Google Analytics'
-                    },
-
-                    xAxis: {
-                        tickInterval: 7 * 24 * 3600 * 1000, // one week
-                        tickWidth: 0,
-                        gridLineWidth: 1,
-                        labels: {
-                            align: 'left',
-                            x: 3,
-                            y: -3
-                        }
-                    },
-
-                    yAxis: [{ // left y axis
-                        title: {
-                            text: null
-                        },
-                        labels: {
-                            align: 'left',
-                            x: 3,
-                            y: 16,
-                            format: '{value:.,0f}'
-                        },
-                        showFirstLabel: false
-                    }, { // right y axis
-                        linkedTo: 0,
-                        gridLineWidth: 0,
-                        opposite: true,
-                        title: {
-                            text: null
-                        },
-                        labels: {
-                            align: 'right',
-                            x: -3,
-                            y: 16,
-                            format: '{value:.,0f}'
-                        },
-                        showFirstLabel: false
+                    plotLines: [{
+                    value: 0,
+                    width: 1,
+                    color: '#808080'
                     }],
-
-                    legend: {
-                        align: 'left',
-                        verticalAlign: 'top',
-                        y: 20,
-                        floating: true,
-                        borderWidth: 0
+                    allowDecimals: false
+                },
+                yAxis: {
+                    title: {
+                        text: 'Values'
                     },
-
-                    tooltip: {
-                        shared: true,
-                        crosshairs: true
-                    },
-
-                    plotOptions: {
-                        series: {
-                            cursor: 'pointer',
-                            point: {
-                                events: {
-                                    click: function (e) {
-                                        hs.htmlExpand(null, {
-                                            pageOrigin: {
-                                                x: e.pageX || e.clientX,
-                                                y: e.pageY || e.clientY
-                                            },
-                                            headingText: this.series.name,
-                                            maincontentText: Highcharts.dateFormat('%A, %b %e, %Y', this.x) + ':<br/> ' +
-                                                this.y + ' visits',
-                                            width: 200
-                                        });
-                                    }
-                                }
-                            },
-                            marker: {
-                                lineWidth: 1
-                            }
-                        }
-                    },
-
-                    series: [{
-                        name: 'All visits',
-                        lineWidth: 4,
-                        marker: {
-                            radius: 4
-                        }
-                    }, {
-                        name: 'New visitors'
-                    }]
-                });
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }],
+                },
+                tooltip: {
+                    valueSuffix: ''
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'middle',
+                    borderWidth: 0
+                },
+                series: data,
+                lang: {
+                    noData: "Nichts zu anzeigen"
+                },
+                noData: {
+                    style: {
+                        fontWeight: 'bold',
+                        fontSize: '15px',
+                        color: '#303030'
+                    }
+                }
             });
-
         });
+    });
+
+
 
     </script>
 
@@ -192,7 +156,7 @@
             <div class="container">
                 <h2>{{ file.filename }}</h2>
                 <p>Revision : {{file.revision}}, Date : {{file.timestamp.strftime('%d-%m-%Y %H:%M:%S')}}</p>
-                <div id="container{{file.id}}" style="min-width: 310px; max-width: 1000px; margin: 50px auto"></div>
+                <div id="graph-{{file.id}}" style="min-width: 310px; max-width: 1000px; margin: 50px auto"></div>
             </div>
             <div class="row">
                 <!-- File source -->

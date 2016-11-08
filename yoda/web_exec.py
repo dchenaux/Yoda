@@ -17,10 +17,9 @@ See Flask documentation for detailed informations about how to deploy an app.
 # TODO : python2 compatibility for source
 # TODO : Finish the compare files functionality
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 import re
 import json
-import pprint
 
 from mongoengine import *
 
@@ -40,7 +39,7 @@ import yoda.settings as settings
 app = Flask(__name__)
 app.config['MONGODB_DB'] = settings.MONGODB
 app.config['SECRET_KEY'] = "b\xac\xea&\x9d\x86\x98Da?\xcaL\x146\x13\x83\x82.$\x91\xee\x03\xe3\x95"
-app.debug = False
+app.debug = True
 
 # Debug toolbar configuration
 app.config['DEBUG_TB_PANELS'] = [
@@ -72,27 +71,13 @@ def _colorize(files_object):
         for frame in file.frames:
             for line in frame.lines:
                 executed_lines.append(line.lineno)
-        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True, linespans="linecode"))
+        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
 
     return files_object
 
 
 def _serialize(file_objects):
     file_objects = json.loads(file_objects)
-    vars_list = set()
-    xAxis = set()
-    series = list()
-
-    for file in file_objects:
-        for frame in file['frames']:
-            for line in frame['lines']:
-                for k,v in line['data'].items():
-                    serie = {'name': '', 'data': list()}
-                    serie['name'] = k
-                    serie['data'].append(v)
-    return file_objects
-
-def _serialize2(file_objects):
     for file in file_objects:
         for frame in file['frames']:
             serie = defaultdict(list)
@@ -101,23 +86,77 @@ def _serialize2(file_objects):
                     serie[k].append(v)
             frame['objects'] = serie
             del frame['lines']
+
     return file_objects
 
-
 def _file_fetch_data(file_id):
-    """
-    Fetch file data
-    :param file_id:
-    :return file_object:
-    """
+    series = {}
     file_object = File.objects(id=file_id)
 
-    return file_object
+    for file in file_object:
+        serie = defaultdict(list)
+        for frame in file.frames:
+            for line in frame.lines:
+                for k, listv in line.data.items():
+                    for v in listv:
+                        if type(v) is (int or float):
+                            serie[k].append(v)
+        series[file.id] = serie
+
+    return file_object, series
+
+def _gen_graph_data(file_objects):
+    file_objects = json.loads(file_objects)
+    var_list = set()
+    series = list()
+
+    # Get list of variables
+    for frame in file_objects[0]['frames']:
+        for lines in frame['lines']:
+            for var in lines['data']:
+                var_list.add(var)
+
+    # Create the list of series
+    for var in var_list:
+
+        serie = OrderedDict()
+        serie['name'] = var
+        serie['data'] = list()
+        series.append(serie)
+
+    # Add data to the series
+    steps = 0
+    for frame in file_objects[0]['frames']:
+        # We make a loop for each line
+        for lines in frame['lines']:
+            steps_per_line = 0 # Start Counter
+            # We loop for the keys and corresponding values
+            for k,v in lines['data'].items():
+                steps_per_line = len(v)
+                for serie in series:
+                    if serie['name'] == k:
+                        if len(serie['data']) == 0:
+                            for i in range(0,steps):
+                                serie['data'].append('null')
+                        serie['data'] += v
+            steps += steps_per_line
+
+    print(json.dumps(series))
+
+    return json.dumps(series)
+
+
+
 
 
 @app.route('/_file_details/<file_id>')
 def _file_details(file_id):
     file_objects = _serialize(File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
+    return json.dumps(file_objects)
+
+@app.route('/_graph_data/<file_id>')
+def _graph_data(file_id):
+    file_objects = _gen_graph_data(File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
     return json.dumps(file_objects)
 
 
@@ -140,9 +179,9 @@ def view_file(file_id):
     :return: render the view_context.html template
     """
 
-    file_object = _file_fetch_data(file_id)
+    file_object, series = _file_fetch_data(file_id)
 
-    return render_template('view_file.html', file=_colorize(file_object))
+    return render_template('view_file.html', file=_colorize(file_object), series=series)
 
 @app.route("/view_context/<file_id>")
 def view_context(file_id):
@@ -152,18 +191,14 @@ def view_context(file_id):
     :return: render the view_context.html template
     """
 
-    file_object = _file_fetch_data(file_id)
+    file_object, series = _file_fetch_data(file_id)
+    print(file_object)
     colorized = _colorize(file_object)
     for file in colorized:
         colorized_file = file
 
 
-    return render_template('partials/view_context.html', file=colorized_file)
-
-@app.route("/generate_graph/<objects_id>")
-def generate_graph(objects_id):
-
-    return render_template('partials/generate_graph.html')
+    return render_template('partials/view_context.html', file=colorized_file, series=series)
 
 
 @app.route("/remove_files/<files_id>")
