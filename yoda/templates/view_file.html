@@ -72,7 +72,7 @@
         var file_id = id.split('-')
         console.log(file_id[1])
 
-    // Get the CSV and create the chart
+    // Get the JSON Data and create the chart
     $.getJSON('/_graph_data/'+file_id[1], function (jsondata) {
 
         var data = $.parseJSON(jsondata);
