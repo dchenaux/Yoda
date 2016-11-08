@@ -141,13 +141,7 @@ def _gen_graph_data(file_objects):
                         serie['data'] += v
             steps += steps_per_line
 
-    print(json.dumps(series))
-
     return json.dumps(series)
-
-
-
-
 
 @app.route('/_file_details/<file_id>')
 def _file_details(file_id):
