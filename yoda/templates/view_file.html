@@ -66,10 +66,6 @@
     <script type=text/javascript src="{{ url_for('static', filename='highcharts-exporting.js') }}"></script>
 
     <script type="text/javascript">
-    /* TODO: The graph is completly wrong with loops */
-    // Why ? Because all the data begin a the left corner instead at the right point
-    /* TODO : Load data through AJAX in order to remove PHP in JS */
-
     $(function () {
 
         var id = $('div[id*="graph-"]').attr("id")
