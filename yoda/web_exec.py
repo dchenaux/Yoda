@@ -148,10 +148,15 @@ def _file_details(file_id):
     file_objects = _serialize(File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
     return json.dumps(file_objects)
 
-@app.route('/_graph_data/<file_id>')
-def _graph_data(file_id):
-    file_objects = _gen_graph_data(File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
-    return json.dumps(file_objects)
+@app.route('/_graph_data/<files_id>')
+def _graph_data(files_id):
+    if '-' not in files_id:
+        file_objects = _gen_graph_data(File.objects(id=files_id).exclude("content","user","filename","timestamp", "revision").to_json())
+        return json.dumps(file_objects)
+    else :
+        files_id = re.split('&', files_id)
+        print(files_id)
+        return json.dumps("hihi")
 
 
 # End of internal functions
@@ -217,7 +222,6 @@ def compare_files(files_id):
     files_object = File.objects(id__in=files_id).exclude("frames", "content")
 
     return render_template('compare_files.html', files=files_object)
-
 
 
 if __name__ == "__main__":

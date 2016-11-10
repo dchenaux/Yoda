@@ -35,7 +35,6 @@
                 $('.list-object').remove();
                 var frame_name = $(this).context.innerText;
                 var frames = $DATA[0].frames;
-
                 $(frames).each(function(){
                     var frame = this;
                     if(frame.name == frame_name){
@@ -75,11 +74,12 @@
             })
 
             $('#GraphModal').on('show.bs.modal', function (event) {
-              var button = $(event.relatedTarget) // Button that triggered the modal
+                console.log($SELECTED_OBJECTS.join('&'));
 
-              // Update the modal's content.
-              var modal = $(this)
-              modal.find('.modal-content').load('/generate_graph/ahaha')
+                $.getJSON('/_graph_data/'+$SELECTED_OBJECTS.join('&'), function (jsondata) {
+                     jsondata
+                })
+
             })
 
             /* Unselect all objects */
@@ -126,6 +126,13 @@
     <div class="modal fade" id="GraphModal" tabindex="-1" role="dialog" aria-labelledby="Graph">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Graphs</h4>
+                </div>
+                <div class="modal-body">
+                    <p>Nothing to show !</p>
+                </div>
             </div>
         </div>
     </div>
