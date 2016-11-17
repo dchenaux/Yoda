@@ -71,7 +71,8 @@ def _colorize(files_object):
         for frame in file.frames:
             for line in frame.lines:
                 executed_lines.append(line.lineno)
-        file.content = highlight(file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
+        file.content = highlight(
+            file.content, PythonLexer(), HtmlFormatter(linenos=True, hl_lines=executed_lines, anchorlinenos=True))
 
     return files_object
 
@@ -105,58 +106,81 @@ def _file_fetch_data(file_id):
 
     return file_object, series
 
-def _gen_graph_data(file_objects):
+def _gen_graph_data(file_objects, objects_list):
+
     file_objects = json.loads(file_objects)
-    var_list = set()
-    series = list()
+    number_of_graphs = len(file_objects)-1
+    current_graph = 0
+    graphs = list()
 
-    # Get list of variables
-    for frame in file_objects[0]['frames']:
-        for lines in frame['lines']:
-            for var in lines['data']:
-                var_list.add(var)
+    while current_graph <= number_of_graphs:
+        var_list = set()
+        series = list()
 
-    # Create the list of series
-    for var in var_list:
+        # Get list of variables
+        for frame in file_objects[current_graph]['frames']:
+            for lines in frame['lines']:
+                for var in lines['data']:
+                    var_id = file_objects[current_graph]['_id']['$oid']+'-'+frame['name']+'-'+var
+                    if objects_list == 'all':
+                        var_list.add(var)
+                    if  var_id in objects_list:
+                        var_list.add(var)
 
-        serie = OrderedDict()
-        serie['name'] = var
-        serie['data'] = list()
-        series.append(serie)
+        # Create the list of series
+        for var in var_list:
+            serie = OrderedDict()
+            serie['name'] = var
+            serie['data'] = list()
+            series.append(serie)
 
-    # Add data to the series
-    steps = 0
-    for frame in file_objects[0]['frames']:
-        # We make a loop for each line
-        for lines in frame['lines']:
-            steps_per_line = 0 # Start Counter
-            # We loop for the keys and corresponding values
-            for k,v in lines['data'].items():
-                steps_per_line = len(v)
-                for serie in series:
-                    if serie['name'] == k:
-                        if len(serie['data']) == 0:
-                            for i in range(0,steps):
-                                serie['data'].append('null')
-                        serie['data'] += v
-            steps += steps_per_line
+        # Add data to the series
+        steps = 0
+        for frame in file_objects[current_graph]['frames']:
+            # We make a loop for each line
+            for lines in frame['lines']:
+                steps_per_line = 0  # Start Counter
+                # We loop for the keys and corresponding values
+                for k, v in lines['data'].items():
+                    steps_per_line = len(v)
+                    for serie in series:
+                        if serie['name'] == k:
+                            if len(serie['data']) == 0:
+                                for i in range(0, steps):
+                                    serie['data'].append('null')
+                            serie['data'] += v
+                steps += steps_per_line
 
-    return json.dumps(series)
+        current_graph += 1
+
+        if number_of_graphs == 0 and objects_list == 'all':
+            graphs = series
+        else:
+            graphs.append(series)
+
+    return json.dumps(graphs)
 
 @app.route('/_file_details/<file_id>')
 def _file_details(file_id):
-    file_objects = _serialize(File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
+    file_objects = _serialize(
+        File.objects(id=file_id).exclude("content","user","filename","timestamp", "revision").to_json())
     return json.dumps(file_objects)
 
-@app.route('/_graph_data/<files_id>')
-def _graph_data(files_id):
-    if '-' not in files_id:
-        file_objects = _gen_graph_data(File.objects(id=files_id).exclude("content","user","filename","timestamp", "revision").to_json())
+@app.route('/_graph_data/<ids>')
+def _graph_data(ids):
+    if '-' not in ids:
+        file_objects = _gen_graph_data(
+            File.objects(id=ids).exclude("content", "user", "filename", "timestamp", "revision").to_json(), 'all')
         return json.dumps(file_objects)
     else :
-        files_id = re.split('&', files_id)
-        print(files_id)
-        return json.dumps("hihi")
+        object_ids = re.split('&', ids)
+        files_id = set()
+        for object_id in object_ids:
+            object_id = re.split('-', object_id)
+            files_id.add(object_id[0])
+        files_id = list(files_id)
+        file_objects = _gen_graph_data(File.objects(id__in=files_id).exclude("content", "user", "filename", "timestamp", "revision").to_json(), object_ids)
+        return json.dumps(file_objects)
 
 
 # End of internal functions
@@ -191,7 +215,6 @@ def view_context(file_id):
     """
 
     file_object, series = _file_fetch_data(file_id)
-    print(file_object)
     colorized = _colorize(file_object)
     for file in colorized:
         colorized_file = file

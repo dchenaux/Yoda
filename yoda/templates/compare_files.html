@@ -8,6 +8,9 @@
 
 {% block scripts %}
     {{ super() }}
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts-data.js') }}"></script>
+    <script type=text/javascript src="{{ url_for('static', filename='highcharts-exporting.js') }}"></script>
     <script type="text/javascript">
         $(document).ready(function() {
             var $SELECTED_OBJECTS = new Array();
@@ -71,16 +74,89 @@
               // Update the modal's content.
               var modal = $(this)
               modal.find('.modal-content').load('/view_context/'+fileid)
-            })
+            });
 
             $('#GraphModal').on('show.bs.modal', function (event) {
+                var modal = $(this)
                 console.log($SELECTED_OBJECTS.join('&'));
 
+                var options = {
+                    chart: {
+                        height: 300
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    title: {
+                        text: 'Evolution of variables',
+                        x: -20 //center
+                    },
+                    subtitle: {
+                        text: '',
+                        x: -20
+                    },
+                    xAxis: {
+                        title: {
+                            text: 'Steps'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }],
+                        allowDecimals: false
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Values'
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }],
+                    },
+                    tooltip: {
+                        valueSuffix: ''
+                    },
+                    legend: {
+                        layout: 'vertical',
+                        align: 'right',
+                        verticalAlign: 'middle',
+                        borderWidth: 0
+                    },
+                    lang: {
+                        noData: "Nichts zu anzeigen"
+                    },
+                    noData: {
+                        style: {
+                            fontWeight: 'bold',
+                            fontSize: '15px',
+                            color: '#303030'
+                        }
+                    }
+                };
+
+                Highcharts.setOptions(options);
+
                 $.getJSON('/_graph_data/'+$SELECTED_OBJECTS.join('&'), function (jsondata) {
-                     jsondata
+                    var data = $.parseJSON(jsondata);
+                    var graph_no = 0;
+                    $(data).each(function() {
+                        modal.find('.modal-content').append('<div id="graph-'+graph_no+'" style="min-width: 1000px; max-width: 1000px; margin: 50px auto"></div>');
+                        Highcharts.chart('graph-'+graph_no, {
+                            series: this,
+                        });
+                        graph_no++;
+                    })
                 })
 
-            })
+            });
+
+            $('#GraphModal').on('hide.bs.modal', function (event) {
+                var modal = $(this)
+                modal.find('.modal-content').empty()
+            });
 
             /* Unselect all objects */
             $('#bt-unselectall').click( function(){
@@ -102,8 +178,6 @@
                     $('#bt-gengraph').prop('disabled', true);
                 }
             });
-
-
 
         });
 
@@ -131,7 +205,6 @@
                     <h4 class="modal-title" id="myModalLabel">Graphs</h4>
                 </div>
                 <div class="modal-body">
-                    <p>Nothing to show !</p>
                 </div>
             </div>
         </div>
