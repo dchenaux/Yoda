@@ -110,7 +110,7 @@
                             <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
                         </a>
                     </td>
-                    <td>{{ file.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
+                    <td data-order="{{ file.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}">{{ file.timestamp.strftime('%d-%m-%Y %H:%M:%S') }}</td>
                     <td>{{ file.filename }}</td>
                     <td>{{ file.revision }}</td>
                     <td>{{ file.user }}</td>
