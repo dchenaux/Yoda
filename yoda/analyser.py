@@ -201,7 +201,11 @@ class Yoda(bdb.Bdb):
                 self.prev_lineno[self.cur_framename] = cur_lineno
                 self.total_linenb += 1
                 if self.total_linenb > self.next_backup:
-                    self._populate_db()
+                    if self.json_results:
+                        if settings.DEBUG:
+                            print(self.json_results)
+                        else:
+                            self._populate_db()
                     self.next_backup += self.next_backup
 
                 self.set_step()
