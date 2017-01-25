@@ -14,9 +14,6 @@ which can be either run directly by executing this script or also deployed on a 
 See Flask documentation for detailed informations about how to deploy an app.
 """
 
-# TODO : python2 compatibility for source
-# TODO : Finish the compare files functionality
-
 from collections import defaultdict, OrderedDict
 import re
 import json

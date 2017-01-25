@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 __author__      = 'David Chenaux'
 __license__     = 'Modified BSD license'
-__version__     = '0.4.1'
+__version__     = '1.0'
 __maintainer__  = __author__
 __email__       = 'd.chenaux@gmail.com'
 __url__         = 'https://github.com/dchenaux/yoda'
@@ -35,7 +35,7 @@ setup(
     dependency_links=[],
 
     classifiers=[
-        'Development Status :: 0.4.1 - Alpha',
+        'Development Status :: 1.0 - Final',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: Modified BSD license',

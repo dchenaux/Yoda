@@ -4,7 +4,7 @@ yoda.analyser.db.set_trace()
 
 a = 1
 b = 3
-
+z = "hello"
 
 for c in range(10):
     d = c

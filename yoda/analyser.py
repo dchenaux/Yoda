@@ -38,9 +38,7 @@ from collections import defaultdict
 from datetime import datetime
 import subprocess
 import sys
-import timeit
 import copy
-from pprint import pprint
 import inspect
 
 import mongoengine
@@ -156,11 +154,9 @@ class Yoda(bdb.Bdb):
         if self.file_id is None:
             self._create_new_file()
             self._clear_cache()
-            print("FILE CREATED")
         else:
             self._update_file()
             self._clear_cache()
-            print("FILE UPDATED")
 
     def user_call(self, frame, args):
         self.interaction(frame, 'call', None)
@@ -172,12 +168,11 @@ class Yoda(bdb.Bdb):
         self.interaction(frame, 'return', None)
 
     def user_exception(self, frame, exception):
-        self.interaction(frame, 'line', exception)
+        self.interaction(frame, 'exception', exception)
 
     def interaction(self, frame, event, exception):
         if self.file_name is None:
             self.file_name = inspect.getfile(frame)
-            print(self.file_name)
 
         if self.file_name is inspect.getfile(frame):
 
@@ -232,8 +227,5 @@ class Yoda(bdb.Bdb):
                 print(self.json_results)
             else:
                 self._populate_db()
-        print(timeit.timeit('"-".join(str(n) for n in range(100))', number=10000))
-
-
 
 db = Yoda()
