@@ -189,7 +189,7 @@ def index():
     Index page of the application which lists all the runs made by the analyser
     :return: render the index.html template
     """
-    return render_template('index.html', files=File.objects.exclude("frames", "content").order_by('-timestamp'))
+    return render_template('index.html', files=File.objects.exclude("frames", "content"))
 
 @app.route("/view_file/<file_id>")
 def view_file(file_id):
