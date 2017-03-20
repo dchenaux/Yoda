@@ -80,7 +80,10 @@ class Yoda(bdb.Bdb):
             if not isinstance(value, self.instrumented_types):
                 continue
 
-            new_locals[name] = [copy.deepcopy(value)]
+            if type(value) is list:
+                new_locals[name] = copy.deepcopy(value)
+            else:
+                new_locals[name] = [copy.deepcopy(value)]
 
         return new_locals
 
